@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
 
 final class StoreUserRequest extends FormRequest
 {
@@ -27,7 +26,10 @@ final class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:5', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'status' => ['sometimes', 'integer', 'in:0,1'],
+            'roles' => ['sometimes', 'array'],
+            'roles.*' => ['exists:roles,name'],
         ];
     }
 
@@ -45,8 +47,10 @@ final class StoreUserRequest extends FormRequest
             'email.email' => 'Please enter a valid email address.',
             'email.unique' => 'This email address is already registered.',
             'password.required' => 'The password field is required.',
-            'password.min' => 'The password must be at least 5 characters.',
+            'password.min' => 'The password must be at least 8 characters.',
             'password.confirmed' => 'The password confirmation does not match.',
+            'roles.array' => 'Roles must be an array.',
+            'roles.*.exists' => 'One or more selected roles are invalid.',
         ];
     }
 }

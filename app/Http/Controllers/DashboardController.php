@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\DashboardService;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,12 +18,12 @@ final class DashboardController extends Controller
     {
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
-        
+
         try {
             // Parse the month parameter (format: Y-m) and create start/end dates
-            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam.'-01')->startOfMonth();
             $end = $start->copy()->endOfMonth();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If invalid month format, fall back to current month
             $start = now()->startOfMonth();
             $end = now()->endOfMonth();

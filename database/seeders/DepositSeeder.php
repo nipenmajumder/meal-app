@@ -21,10 +21,10 @@ final class DepositSeeder extends Seeder
         foreach ($users as $user) {
             // Create 3-5 random deposits for each user this month
             $depositCount = rand(3, 5);
-            
+
             for ($i = 0; $i < $depositCount; $i++) {
                 $date = fake()->dateTimeBetween($currentMonth, $endOfMonth);
-                
+
                 \App\Models\Deposit::updateOrCreate(
                     [
                         'user_id' => $user->id,
@@ -44,10 +44,10 @@ final class DepositSeeder extends Seeder
 
         foreach ($users as $user) {
             $depositCount = rand(2, 4);
-            
+
             for ($i = 0; $i < $depositCount; $i++) {
                 $date = fake()->dateTimeBetween($startOfPreviousMonth, $endOfPreviousMonth);
-                
+
                 \App\Models\Deposit::updateOrCreate(
                     [
                         'user_id' => $user->id,

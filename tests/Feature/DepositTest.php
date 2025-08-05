@@ -6,7 +6,6 @@ namespace Tests\Feature;
 
 use App\Models\Deposit;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,7 +21,7 @@ final class DepositTest extends TestCase
     public function test_authenticated_users_can_view_deposits_index(): void
     {
         $user = User::factory()->create(['status' => 1]);
-        
+
         $this->actingAs($user)
             ->get('/deposits')
             ->assertOk()
@@ -191,7 +190,7 @@ final class DepositTest extends TestCase
     public function test_deposits_index_can_filter_by_month(): void
     {
         $user = User::factory()->create(['status' => 1]);
-        
+
         // Create deposit in current month
         Deposit::factory()->create([
             'user_id' => $user->id,

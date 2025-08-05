@@ -42,7 +42,7 @@ final class DepositDataTransformer
             $dates[] = $current->format('Y-m-d');
             $current->addDay();
         }
-        
+
         return collect($dates);
     }
 

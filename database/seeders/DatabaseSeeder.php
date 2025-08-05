@@ -18,6 +18,9 @@ final class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // First run roles and permissions seeder
+        $this->call(RolesAndPermissionsSeeder::class);
+
         User::factory(10)->create()->each(function (User $user) {
             $user->meals()->saveMany(
                 Meal::factory()->count(rand(1, 10))->make()

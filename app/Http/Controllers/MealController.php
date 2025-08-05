@@ -16,27 +16,27 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class MealController extends Controller
+final class MealController extends Controller
 {
     public function index(Request $request): Response
     {
         $month = $request->query('month', now()->format('Y-m'));
-        
+
         // Cache the data for better performance
         $cacheKey = "meals_data_{$month}";
         $statsCacheKey = "meals_stats_{$month}";
-        
+
         $data = Cache::remember($cacheKey, 3600, function () use ($month) {
             return $this->transformMealData($month);
         });
-        
+
         $monthlyStats = Cache::remember($statsCacheKey, 3600, function () use ($month) {
             return $this->getMonthlyStats($month);
         });
-        
+
         $users = User::all();
         $userNames = $users->pluck('name')->toArray();
-        
+
         return Inertia::render('meals/Index', [
             'data' => $data,
             'userNames' => $userNames,
@@ -49,7 +49,7 @@ class MealController extends Controller
     public function store(StoreMealRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        
+
         Meal::updateOrCreate(
             [
                 'user_id' => $validated['user_id'],
@@ -59,12 +59,12 @@ class MealController extends Controller
                 'meal_count' => $validated['meal_count'],
             ]
         );
-        
+
         // Clear cache for the month
         $month = Carbon::parse($request->date)->format('Y-m');
         Cache::forget("meals_data_{$month}");
         Cache::forget("meals_stats_{$month}");
-        
+
         return redirect()->back()->with('success', 'Meal record created successfully.');
     }
 
@@ -80,7 +80,7 @@ class MealController extends Controller
         $meals = $request->meals;
 
         foreach ($meals as $userId => $mealCount) {
-            if (!empty($mealCount) && $mealCount > 0) {
+            if (! empty($mealCount) && $mealCount > 0) {
                 Meal::updateOrCreate(
                     [
                         'user_id' => $userId,
@@ -104,12 +104,12 @@ class MealController extends Controller
     public function update(UpdateMealRequest $request, Meal $meal): RedirectResponse
     {
         $meal->update($request->validated());
-        
+
         // Clear cache for the month
         $month = Carbon::parse($request->date)->format('Y-m');
         Cache::forget("meals_data_{$month}");
         Cache::forget("meals_stats_{$month}");
-        
+
         return redirect()->back()->with('success', 'Meal record updated successfully.');
     }
 
@@ -117,11 +117,11 @@ class MealController extends Controller
     {
         $month = $meal->date->format('Y-m');
         $meal->delete();
-        
+
         // Clear cache for the month
         Cache::forget("meals_data_{$month}");
         Cache::forget("meals_stats_{$month}");
-        
+
         return redirect()->back()->with('success', 'Meal record deleted successfully.');
     }
 
@@ -130,12 +130,12 @@ class MealController extends Controller
         $month = $request->query('month', now()->format('Y-m'));
         $data = $this->transformMealData($month);
         $users = User::all();
-        
+
         $filename = "meals_{$month}.csv";
-        
+
         return response()->streamDownload(function () use ($data, $users) {
             $handle = fopen('php://output', 'w');
-            
+
             // Header row
             $headers = ['Date'];
             foreach ($users as $user) {
@@ -143,22 +143,22 @@ class MealController extends Controller
             }
             $headers[] = 'Total';
             fputcsv($handle, $headers);
-            
+
             // Data rows
             foreach ($data as $row) {
                 $csvRow = [$row['date']];
                 $rowTotal = 0;
-                
+
                 foreach ($users as $user) {
                     $value = $row[$user->name] ?? 0;
                     $csvRow[] = $value;
                     $rowTotal += (float) $value;
                 }
                 $csvRow[] = $rowTotal;
-                
+
                 fputcsv($handle, $csvRow);
             }
-            
+
             fclose($handle);
         }, $filename);
     }
@@ -167,10 +167,10 @@ class MealController extends Controller
     {
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-        
+
         // Get all users
         $users = User::all();
-        
+
         // Get all meals for the month
         $meals = Meal::with('user')
             ->whereBetween('date', [$startDate, $endDate])
@@ -178,25 +178,25 @@ class MealController extends Controller
             ->groupBy(function ($meal) {
                 return $meal->date->format('Y-m-d');
             });
-        
+
         $data = [];
         $currentDate = $startDate->copy();
-        
+
         while ($currentDate <= $endDate) {
             $dateString = $currentDate->format('d-m-Y');
             $row = ['date' => $dateString];
-            
+
             $dayMeals = $meals->get($currentDate->format('Y-m-d'), collect());
-            
+
             foreach ($users as $user) {
                 $userMeal = $dayMeals->where('user_id', $user->id)->first();
                 $row[$user->name] = $userMeal ? $userMeal->meal_count : 0;
             }
-            
+
             $data[] = $row;
             $currentDate->addDay();
         }
-        
+
         return $data;
     }
 
@@ -204,17 +204,17 @@ class MealController extends Controller
     {
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-        
+
         $totalMeals = Meal::whereBetween('date', [$startDate, $endDate])
             ->sum('meal_count');
-        
+
         $mealCount = Meal::whereBetween('date', [$startDate, $endDate])
             ->count();
-        
+
         $activeUsers = Meal::whereBetween('date', [$startDate, $endDate])
             ->distinct('user_id')
             ->count();
-        
+
         return [
             'totalMeals' => number_format($totalMeals, 1),
             'mealCount' => $mealCount,

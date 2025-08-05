@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateDepositRequest;
 use App\Models\Deposit;
 use App\Models\User;
 use App\Services\DepositDataTransformer;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -22,12 +23,12 @@ final class DepositController extends Controller
     {
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
-        
+
         try {
             // Parse the month parameter (format: Y-m) and create start/end dates
-            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam.'-01')->startOfMonth();
             $end = $start->copy()->endOfMonth();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If invalid month format, fall back to current month
             $start = now()->startOfMonth();
             $end = now()->endOfMonth();
@@ -48,21 +49,6 @@ final class DepositController extends Controller
             'currentMonth' => $start->format('Y-m'),
             'monthlyStats' => $this->getMonthlyStats($start, $end),
         ]);
-    }
-
-    private function getMonthlyStats($start, $end)
-    {
-        $totalDeposits = (float) Deposit::whereBetween('date', [$start, $end])->sum('amount');
-        $depositCount = Deposit::whereBetween('date', [$start, $end])->count();
-        $activeUsers = Deposit::whereBetween('date', [$start, $end])
-            ->distinct('user_id')
-            ->count('user_id');
-
-        return [
-            'totalAmount' => number_format($totalDeposits, 2),
-            'depositCount' => $depositCount,
-            'activeUsers' => $activeUsers,
-        ];
     }
 
     public function store(StoreDepositRequest $request)
@@ -112,12 +98,12 @@ final class DepositController extends Controller
     {
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
-        
+
         try {
             // Parse the month parameter (format: Y-m) and create start/end dates
-            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam.'-01')->startOfMonth();
             $end = $start->copy()->endOfMonth();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $start = now()->startOfMonth();
             $end = now()->endOfMonth();
         }
@@ -143,5 +129,20 @@ final class DepositController extends Controller
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    private function getMonthlyStats($start, $end)
+    {
+        $totalDeposits = (float) Deposit::whereBetween('date', [$start, $end])->sum('amount');
+        $depositCount = Deposit::whereBetween('date', [$start, $end])->count();
+        $activeUsers = Deposit::whereBetween('date', [$start, $end])
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return [
+            'totalAmount' => number_format($totalDeposits, 2),
+            'depositCount' => $depositCount,
+            'activeUsers' => $activeUsers,
+        ];
     }
 }

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Deposit;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -21,14 +22,15 @@ final class DepositBulkController extends Controller
 
         $file = $request->file('file');
         $handle = fopen($file->path(), 'r');
-        
-        if (!$handle) {
+
+        if (! $handle) {
             return back()->withErrors(['file' => 'Unable to read the uploaded file.']);
         }
 
         $headers = fgetcsv($handle);
-        if (!$headers || !$this->validateHeaders($headers)) {
+        if (! $headers || ! $this->validateHeaders($headers)) {
             fclose($handle);
+
             return back()->withErrors(['file' => 'Invalid CSV format. Expected headers: user_id, date, amount']);
         }
 
@@ -38,13 +40,14 @@ final class DepositBulkController extends Controller
         $row = 1;
 
         DB::beginTransaction();
-        
+
         try {
             while (($data = fgetcsv($handle)) !== false) {
                 $row++;
-                
+
                 if (count($data) < 3) {
                     $errors[] = "Row {$row}: Insufficient data";
+
                     continue;
                 }
 
@@ -53,13 +56,14 @@ final class DepositBulkController extends Controller
                     'date' => $data[1],
                     'amount' => $data[2],
                 ], [
-                    'user_id' => 'required|integer|in:' . implode(',', $users),
+                    'user_id' => 'required|integer|in:'.implode(',', $users),
                     'date' => 'required|date|before_or_equal:today',
                     'amount' => 'required|numeric|min:0|max:99999.99',
                 ]);
 
                 if ($validator->fails()) {
-                    $errors[] = "Row {$row}: " . implode(', ', $validator->errors()->all());
+                    $errors[] = "Row {$row}: ".implode(', ', $validator->errors()->all());
+
                     continue;
                 }
 
@@ -72,7 +76,7 @@ final class DepositBulkController extends Controller
                 );
 
                 $imported++;
-                
+
                 // Clear cache for the month
                 $monthKey = now()->parse($data[1])->format('Y-m');
                 Cache::forget("deposits.monthly.{$monthKey}");
@@ -82,26 +86,27 @@ final class DepositBulkController extends Controller
             fclose($handle);
 
             $message = "Successfully imported {$imported} deposits.";
-            if (!empty($errors)) {
-                $message .= ' ' . count($errors) . ' errors occurred.';
+            if (! empty($errors)) {
+                $message .= ' '.count($errors).' errors occurred.';
             }
 
             return back()->with('success', $message)->with('import_errors', $errors);
-            
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             DB::rollBack();
             fclose($handle);
-            return back()->withErrors(['file' => 'An error occurred during import: ' . $e->getMessage()]);
+
+            return back()->withErrors(['file' => 'An error occurred during import: '.$e->getMessage()]);
         }
     }
 
     public function template()
     {
         $users = User::active()->select('id', 'name')->get();
-        
+
         $csv = "user_id,date,amount\n";
         foreach ($users as $user) {
-            $csv .= "{$user->id}," . now()->format('Y-m-d') . ",0.00\n";
+            $csv .= "{$user->id},".now()->format('Y-m-d').",0.00\n";
         }
 
         return response($csv)
@@ -112,6 +117,7 @@ final class DepositBulkController extends Controller
     private function validateHeaders(array $headers): bool
     {
         $expectedHeaders = ['user_id', 'date', 'amount'];
+
         return array_slice($headers, 0, 3) === $expectedHeaders;
     }
 }

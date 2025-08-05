@@ -8,7 +8,6 @@ use App\Models\Deposit;
 use App\Models\Meal;
 use App\Models\ShoppingExpense;
 use App\Models\User;
-use Carbon\CarbonImmutable;
 
 final class DashboardService
 {
@@ -16,7 +15,7 @@ final class DashboardService
     {
         $start = $startDate ?? now()->startOfMonth();
         $end = $endDate ?? now()->endOfMonth();
-        
+
         return (float) Meal::query()
             ->whereBetween('date', [$start, $end])
             ->sum('meal_count');
@@ -26,7 +25,7 @@ final class DashboardService
     {
         $start = $startDate ?? now()->startOfMonth();
         $end = $endDate ?? now()->endOfMonth();
-        
+
         return (float) ShoppingExpense::query()
             ->whereBetween('date', [$start, $end])
             ->sum('amount');
@@ -36,7 +35,7 @@ final class DashboardService
     {
         $start = $startDate ?? now()->startOfMonth();
         $end = $endDate ?? now()->endOfMonth();
-        
+
         return (float) Deposit::query()
             ->whereBetween('date', [$start, $end])
             ->sum('amount');
@@ -51,7 +50,7 @@ final class DashboardService
     {
         $start = $startDate ?? now()->startOfMonth();
         $end = $endDate ?? now()->endOfMonth();
-        
+
         return User::query()
             ->active()
             ->withSum(['meals as total_meal' => function ($query) use ($start, $end) {

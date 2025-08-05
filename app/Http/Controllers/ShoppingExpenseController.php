@@ -8,6 +8,7 @@ use App\Http\Requests\StoreShoppingExpenseRequest;
 use App\Http\Requests\UpdateShoppingExpenseRequest;
 use App\Models\ShoppingExpense;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,12 +18,12 @@ final class ShoppingExpenseController extends Controller
     {
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
-        
+
         try {
             // Parse the month parameter (format: Y-m) and create start/end dates
-            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam.'-01')->startOfMonth();
             $end = $start->copy()->endOfMonth();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If invalid month format, fall back to current month
             $start = now()->startOfMonth();
             $end = now()->endOfMonth();
@@ -43,61 +44,6 @@ final class ShoppingExpenseController extends Controller
             'currentMonth' => $start->format('Y-m'),
             'monthlyStats' => $this->getMonthlyStats($start, $end),
         ]);
-    }
-
-    private function transformExpenseData($start, $end)
-    {
-        $expenses = ShoppingExpense::with('user')
-            ->whereBetween('date', [$start, $end])
-            ->orderBy('date')
-            ->get();
-
-        $userNames = User::active()->pluck('name')->toArray();
-        
-        // Create date range for the month
-        $dates = [];
-        $current = $start->copy();
-        while ($current <= $end) {
-            $dates[] = $current->format('d-m-Y');
-            $current->addDay();
-        }
-
-        // Transform data into table format
-        $data = [];
-        foreach ($dates as $date) {
-            $row = ['date' => $date];
-            
-            foreach ($userNames as $userName) {
-                $expense = $expenses->first(function ($expense) use ($date, $userName) {
-                    return $expense->date->format('d-m-Y') === $date && 
-                           $expense->user->name === $userName;
-                });
-                
-                $row[$userName] = $expense ? $expense->amount : 0;
-            }
-            
-            $data[] = $row;
-        }
-
-        return [
-            'data' => $data,
-            'userNames' => $userNames,
-        ];
-    }
-
-    private function getMonthlyStats($start, $end)
-    {
-        $totalExpenses = (float) ShoppingExpense::whereBetween('date', [$start, $end])->sum('amount');
-        $expenseCount = ShoppingExpense::whereBetween('date', [$start, $end])->count();
-        $activeUsers = ShoppingExpense::whereBetween('date', [$start, $end])
-            ->distinct('user_id')
-            ->count('user_id');
-
-        return [
-            'totalAmount' => number_format($totalExpenses, 2),
-            'expenseCount' => $expenseCount,
-            'activeUsers' => $activeUsers,
-        ];
     }
 
     public function store(StoreShoppingExpenseRequest $request)
@@ -150,12 +96,12 @@ final class ShoppingExpenseController extends Controller
     {
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
-        
+
         try {
             // Parse the month parameter (format: Y-m) and create start/end dates
-            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam . '-01')->startOfMonth();
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', $monthParam.'-01')->startOfMonth();
             $end = $start->copy()->endOfMonth();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $start = now()->startOfMonth();
             $end = now()->endOfMonth();
         }
@@ -182,5 +128,60 @@ final class ShoppingExpenseController extends Controller
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+    }
+
+    private function transformExpenseData($start, $end)
+    {
+        $expenses = ShoppingExpense::with('user')
+            ->whereBetween('date', [$start, $end])
+            ->orderBy('date')
+            ->get();
+
+        $userNames = User::active()->pluck('name')->toArray();
+
+        // Create date range for the month
+        $dates = [];
+        $current = $start->copy();
+        while ($current <= $end) {
+            $dates[] = $current->format('d-m-Y');
+            $current->addDay();
+        }
+
+        // Transform data into table format
+        $data = [];
+        foreach ($dates as $date) {
+            $row = ['date' => $date];
+
+            foreach ($userNames as $userName) {
+                $expense = $expenses->first(function ($expense) use ($date, $userName) {
+                    return $expense->date->format('d-m-Y') === $date &&
+                           $expense->user->name === $userName;
+                });
+
+                $row[$userName] = $expense ? $expense->amount : 0;
+            }
+
+            $data[] = $row;
+        }
+
+        return [
+            'data' => $data,
+            'userNames' => $userNames,
+        ];
+    }
+
+    private function getMonthlyStats($start, $end)
+    {
+        $totalExpenses = (float) ShoppingExpense::whereBetween('date', [$start, $end])->sum('amount');
+        $expenseCount = ShoppingExpense::whereBetween('date', [$start, $end])->count();
+        $activeUsers = ShoppingExpense::whereBetween('date', [$start, $end])
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return [
+            'totalAmount' => number_format($totalExpenses, 2),
+            'expenseCount' => $expenseCount,
+            'activeUsers' => $activeUsers,
+        ];
     }
 }
