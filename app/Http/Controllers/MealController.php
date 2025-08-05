@@ -48,7 +48,17 @@ class MealController extends Controller
 
     public function store(StoreMealRequest $request): RedirectResponse
     {
-        Meal::create($request->validated());
+        $validated = $request->validated();
+        
+        Meal::updateOrCreate(
+            [
+                'user_id' => $validated['user_id'],
+                'date' => $validated['date'],
+            ],
+            [
+                'meal_count' => $validated['meal_count'],
+            ]
+        );
         
         // Clear cache for the month
         $month = Carbon::parse($request->date)->format('Y-m');
@@ -165,7 +175,9 @@ class MealController extends Controller
         $meals = Meal::with('user')
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
-            ->groupBy('date');
+            ->groupBy(function ($meal) {
+                return $meal->date->format('Y-m-d');
+            });
         
         $data = [];
         $currentDate = $startDate->copy();
