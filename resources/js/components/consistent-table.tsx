@@ -34,8 +34,8 @@ interface ConsistentTableCellProps {
 
 export function ConsistentTable({ children, className = '' }: ConsistentTableProps) {
     return (
-        <div className="border-border relative overflow-hidden rounded-lg border bg-card shadow-sm">
-            <div className="overflow-auto max-h-[70vh]">
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+            <div className="overflow-auto max-h-[600px]">
                 <Table className={`border-collapse ${className}`}>
                     {children}
                 </Table>
@@ -44,7 +44,7 @@ export function ConsistentTable({ children, className = '' }: ConsistentTablePro
     );
 }
 
-export function ScrollableTableContainer({ title, subtitle, children }: { title?: string; subtitle?: string; children: React.ReactNode }) {
+export function ScrollableTableContainer({ children, title, subtitle }: { children: React.ReactNode; title?: string; subtitle?: string }) {
     return (
         <div className="border-border relative min-h-[50vh] flex-1 overflow-hidden rounded-xl border bg-card shadow-sm">
             {(title || subtitle) && (
@@ -53,12 +53,11 @@ export function ScrollableTableContainer({ title, subtitle, children }: { title?
                     {subtitle && <p className="text-sm text-center text-muted-foreground mt-1">{subtitle}</p>}
                 </div>
             )}
-                                {children}
+            <div className="overflow-auto">
+                <Table className="border-collapse">
+                    {children}
                 </Table>
             </div>
-        </div>
-    );
-}
         </div>
     );
 }
@@ -121,23 +120,5 @@ export function ConsistentTableHead({ children, className = '', isSticky = false
         <TableHead className={`${headClasses} ${className}`}>
             {children}
         </TableHead>
-    );
-}
-
-export function ScrollableTableContainer({ children, title, subtitle }: { children: React.ReactNode; title?: string; subtitle?: string }) {
-    return (
-        <div className="border-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min bg-card shadow-sm">
-            {(title || subtitle) && (
-                <div className="p-4 border-b bg-muted/50">
-                    {title && <h2 className="text-xl font-semibold text-center text-foreground">{title}</h2>}
-                    {subtitle && <p className="text-sm text-center text-muted-foreground mt-1">{subtitle}</p>}
-                </div>
-            )}
-            <div className="overflow-auto">
-                <Table className="border-collapse">
-                    {children}
-                </Table>
-            </div>
-        </div>
     );
 }

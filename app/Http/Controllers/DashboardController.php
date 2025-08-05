@@ -37,12 +37,16 @@ final class DashboardController extends Controller
 
         return Inertia::render('dashboard/dashboard', [
             'users' => $dashboardService->getUsersData($mealRate, $start, $end),
-            'totalMeal' => $totalMeal,
-            'totalDeposit' => $totalDeposit,
-            'totalShoppingExpense' => $totalShoppingExpense,
-            'balance' => $balance,
+            'statistics' => [
+                'totalBalance' => $balance,
+                'totalDeposits' => $totalDeposit,
+                'totalMeals' => $totalMeal,
+                'totalShoppingExpenses' => $totalShoppingExpense,
+                'mealCost' => $totalMeal * $mealRate,
+                'shoppingCost' => $totalShoppingExpense,
+            ],
             'currentMonth' => $monthParam,
-            'mealRate' => $mealRate,
+            'formattedMonth' => $start->format('F Y'),
         ]);
     }
 }
