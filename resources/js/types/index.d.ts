@@ -37,7 +37,7 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     status: number;
-    roles?: Role[];
+    permissions?: string[]; // Array of permission names
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
@@ -63,4 +63,4 @@ export interface Permission {
 export interface PageProps<T extends Record<string, unknown> = Record<string, unknown>> {
     auth: Auth;
     ziggy: Config & { location: string };
-} & T
+}
