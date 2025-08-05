@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepositBulkController;
 use App\Http\Controllers\DepositController;
 use App\Http\Controllers\MealController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ShoppingExpenseController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User management routes
     Route::resource('users', UserController::class);
     Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+
+    // Role management routes
+    Route::resource('roles', RoleController::class)->except(['show', 'create', 'edit']);
+    Route::get('roles/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
+    Route::post('roles/update-permissions', [RoleController::class, 'updatePermissions'])->name('roles.update-permissions');
+    Route::get('roles/{role}/permissions', [RoleController::class, 'rolePermissions'])->name('roles.role-permissions');
+    Route::post('roles/{role}/permissions', [RoleController::class, 'updateRolePermissions'])->name('roles.update-role-permissions');
 });
 
 require __DIR__.'/settings.php';

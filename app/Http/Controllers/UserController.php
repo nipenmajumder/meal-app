@@ -43,7 +43,7 @@ final class UserController extends Controller
                 $query->where('status', $request->status);
             })
             ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
-            ->paginate($request->per_page ?? 15)
+            ->paginate($request->per_page ?? 10)
             ->withQueryString();
 
         $roles = Role::all();

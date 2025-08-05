@@ -34,30 +34,26 @@ interface ConsistentTableCellProps {
 
 export function ConsistentTable({ children, className = '' }: ConsistentTableProps) {
     return (
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-            <div className="overflow-auto max-h-[600px]">
-                <Table className={`border-collapse ${className}`}>
-                    {children}
-                </Table>
-            </div>
+        <div className="rounded-lg border border-border bg-card shadow-sm">
+            <Table className={`border-collapse ${className}`}>
+                {children}
+            </Table>
         </div>
     );
 }
 
 export function ScrollableTableContainer({ children, title, subtitle }: { children: React.ReactNode; title?: string; subtitle?: string }) {
     return (
-        <div className="border-border relative min-h-[50vh] flex-1 overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="border-border relative  flex-1 rounded-xl border bg-card shadow-sm">
             {(title || subtitle) && (
                 <div className="p-4 border-b bg-muted/50">
                     {title && <h2 className="text-xl font-semibold text-center text-foreground">{title}</h2>}
                     {subtitle && <p className="text-sm text-center text-muted-foreground mt-1">{subtitle}</p>}
                 </div>
             )}
-            <div className="overflow-auto">
-                <Table className="border-collapse">
-                    {children}
-                </Table>
-            </div>
+            <Table className="border-collapse">
+                {children}
+            </Table>
         </div>
     );
 }
@@ -113,7 +109,7 @@ export function ConsistentTableHead({ children, className = '', isSticky = false
     let headClasses = 'text-center font-semibold text-foreground min-w-[120px] border-r border-border/50 bg-muted/80';
     
     if (isSticky) {
-        headClasses += ' sticky left-0 z-30 min-w-[160px] border-r-2 border-border';
+        headClasses += 'sticky left-0 z-30 min-w-[160px] border-r-2 border-border';
     }
     
     return (

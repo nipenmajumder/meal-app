@@ -18,7 +18,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { User, Role } from '@/types';
+import { UserPlus, Edit, Mail, Lock, Shield, Activity } from 'lucide-react';
 
 interface UserFormModalProps {
     isOpen: boolean;
@@ -103,118 +105,122 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>
-                        {isEditing ? 'Edit User' : 'Create New User'}
+                        {isEditing ? 'Edit User' : 'Add New User'}
                     </DialogTitle>
                     <DialogDescription>
                         {isEditing 
-                            ? 'Update user information, roles, and status. Leave password blank to keep current password.' 
-                            : 'Create a new user account with roles and permissions.'
+                            ? 'Update user details below.' 
+                            : 'Fill in the details to create a new user.'
                         }
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Name */}
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className={errors.name ? 'border-red-500' : ''}
-                            required
-                        />
-                        {errors.name && (
-                            <p className="text-sm text-red-600">{errors.name}</p>
-                        )}
-                    </div>
-
-                    {/* Email */}
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email Address *</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            className={errors.email ? 'border-red-500' : ''}
-                            required
-                        />
-                        {errors.email && (
-                            <p className="text-sm text-red-600">{errors.email}</p>
-                        )}
-                    </div>
-
-                    {/* Password */}
-                    <div className="space-y-2">
-                        <Label htmlFor="password">
-                            Password {!isEditing && '*'}
-                            {isEditing && (
-                                <span className="text-sm text-muted-foreground ml-2">
-                                    (leave blank to keep current)
-                                </span>
-                            )}
-                        </Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            className={errors.password ? 'border-red-500' : ''}
-                            required={!isEditing}
-                        />
-                        {errors.password && (
-                            <p className="text-sm text-red-600">{errors.password}</p>
-                        )}
-                    </div>
-
-                    {/* Password Confirmation */}
-                    {data.password && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="password_confirmation">Confirm Password *</Label>
+                            <Label htmlFor="name">Name *</Label>
                             <Input
-                                id="password_confirmation"
-                                type="password"
-                                value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
-                                className={errors.password_confirmation ? 'border-red-500' : ''}
-                                required={!!data.password}
+                                id="name"
+                                type="text"
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                className={errors.name ? 'border-red-500' : ''}
+                                placeholder="Full name"
+                                required
                             />
-                            {errors.password_confirmation && (
-                                <p className="text-sm text-red-600">{errors.password_confirmation}</p>
+                            {errors.name && (
+                                <p className="text-sm text-red-600">{errors.name}</p>
                             )}
                         </div>
-                    )}
 
-                    {/* Status */}
-                    <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <Select
-                            value={data.status.toString()}
-                            onValueChange={(value) => setData('status', parseInt(value))}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="1">Active</SelectItem>
-                                <SelectItem value="0">Inactive</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {errors.status && (
-                            <p className="text-sm text-red-600">{errors.status}</p>
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                className={errors.email ? 'border-red-500' : ''}
+                                placeholder="email@example.com"
+                                required
+                            />
+                            {errors.email && (
+                                <p className="text-sm text-red-600">{errors.email}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Password */}
+                        <div className="space-y-2">
+                            <Label htmlFor="password">
+                                Password {!isEditing && '*'}
+                                {isEditing && <span className="text-xs text-muted-foreground">(optional)</span>}
+                            </Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                className={errors.password ? 'border-red-500' : ''}
+                                placeholder={isEditing ? "Leave blank to keep current" : "Password"}
+                                required={!isEditing}
+                            />
+                            {errors.password && (
+                                <p className="text-sm text-red-600">{errors.password}</p>
+                            )}
+                        </div>
+
+                        {/* Password Confirmation */}
+                        {data.password && (
+                            <div className="space-y-2">
+                                <Label htmlFor="password_confirmation">Confirm Password *</Label>
+                                <Input
+                                    id="password_confirmation"
+                                    type="password"
+                                    value={data.password_confirmation}
+                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    className={errors.password_confirmation ? 'border-red-500' : ''}
+                                    placeholder="Confirm password"
+                                    required={!!data.password}
+                                />
+                                {errors.password_confirmation && (
+                                    <p className="text-sm text-red-600">{errors.password_confirmation}</p>
+                                )}
+                            </div>
                         )}
+
+                        {/* Status */}
+                        <div className="space-y-2">
+                            <Label htmlFor="status">Status</Label>
+                            <Select
+                                value={data.status.toString()}
+                                onValueChange={(value) => setData('status', parseInt(value))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">Active</SelectItem>
+                                    <SelectItem value="0">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.status && (
+                                <p className="text-sm text-red-600">{errors.status}</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Roles */}
                     {availableRoles.length > 0 && (
                         <div className="space-y-2">
                             <Label>Roles</Label>
-                            <div className="space-y-2 max-h-32 overflow-y-auto border rounded p-3">
+                            <div className="grid grid-cols-2 gap-2 p-3 border rounded">
                                 {availableRoles.map((role) => (
                                     <div key={role.id} className="flex items-center space-x-2">
                                         <Checkbox
@@ -240,7 +246,7 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                     )}
 
                     {/* Form Actions */}
-                    <div className="flex justify-end space-x-2 pt-4">
+                    <div className="flex justify-end gap-2 pt-4">
                         <Button
                             type="button"
                             variant="outline"
@@ -249,7 +255,7 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                             Cancel
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Saving...' : (isEditing ? 'Update User' : 'Create User')}
+                            {processing ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
                         </Button>
                     </div>
                 </form>
