@@ -25,8 +25,8 @@ final class StoreMealRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'exists:users,id'],
-            'date' => ['required', 'date', 'before_or_equal:today'],
-            'meal_count' => ['required', 'numeric', 'min:0', 'max:10'],
+            'date' => ['required', 'date', new \App\Rules\FutureDateRule],
+            'meal_count' => ['required', new \App\Rules\MealCountRule],
         ];
     }
 

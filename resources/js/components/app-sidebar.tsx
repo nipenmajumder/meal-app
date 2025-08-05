@@ -6,59 +6,80 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, TrendingUp, ShoppingCart, UtensilsCrossed, Users, Shield, UserCog } from 'lucide-react';
 import AppLogo from './app-logo';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useMemo } from 'react';
 
-const mainNavItems: NavItem[] = [
+// Define navigation items with their required permissions
+const navigationConfig: Array<NavItem & { permission?: string; roles?: string[] }> = [
     {
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+        permission: 'view dashboard',
     },
     {
         title: 'Deposits',
         href: '/deposits',
         icon: TrendingUp,
+        permission: 'view deposits',
     },
     {
         title: 'Shopping Expenses',
         href: '/shopping-expenses',
         icon: ShoppingCart,
+        permission: 'view shopping expenses',
     },
     {
         title: 'Meals',
         href: '/meals',
         icon: UtensilsCrossed,
+        permission: 'view meals',
     },
     {
         title: 'Users',
         href: '/users',
         icon: Users,
+        permission: 'view users',
     },
     {
         title: 'Roles',
         href: '/roles',
         icon: UserCog,
+        permission: 'view roles',
     },
     {
         title: 'Permissions',
         href: '/roles/permissions',
         icon: Shield,
+        permission: 'view roles', // Same as roles since permissions are part of role management
     },
 ];
 
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Repository',
-//         href: 'https://github.com/laravel/react-starter-kit',
-//         icon: Folder,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits',
-//         icon: BookOpen,
-//     },
-// ];
-
 export function AppSidebar() {
+    const { hasPermission, hasRole } = usePermissions();
+    
+    // Filter navigation items based on user permissions
+    const mainNavItems: NavItem[] = useMemo(() => {
+        return navigationConfig.filter(item => {
+            // If no permission is required, show the item
+            if (!item.permission && !item.roles) {
+                return true;
+            }
+            
+            // Check permission
+            if (item.permission && hasPermission(item.permission)) {
+                return true;
+            }
+            
+            // Check roles
+            if (item.roles && item.roles.some(role => hasRole(role))) {
+                return true;
+            }
+            
+            return false;
+        }).map(({ permission, roles, ...navItem }) => navItem); // Remove permission/roles from the final nav item
+    }, [hasPermission, hasRole]);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

@@ -37,7 +37,8 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     status: number;
-    permissions?: string[]; // Array of permission names
+    permissions?: Permission[]; // Array of permission objects
+    roles?: Role[]; // Array of role objects
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...

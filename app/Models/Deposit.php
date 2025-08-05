@@ -24,6 +24,32 @@ final class Deposit extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Scopes for better query building
+    public function scopeForMonth($query, $year, $month)
+    {
+        return $query->whereYear('date', $year)->whereMonth('date', $month);
+    }
+
+    public function scopeForDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('date', [$startDate, $endDate]);
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    // Validation rules
+    public static function validationRules(): array
+    {
+        return [
+            'user_id' => ['required', 'exists:users,id'],
+            'date' => ['required', 'date', 'before_or_equal:today'],
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999.99'],
+        ];
+    }
+
     protected function casts(): array
     {
         return [

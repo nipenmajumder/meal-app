@@ -30,22 +30,22 @@ final class DashboardController extends Controller
             $monthParam = now()->format('Y-m');
         }
 
-        $totalMeal = $dashboardService->getTotalMeal($start, $end);
-        $totalDeposit = $dashboardService->getTotalDeposit($start, $end);
-        $totalShoppingExpense = $dashboardService->getTotalShoppingExpense($start, $end);
-        $balance = $totalDeposit - $totalShoppingExpense;
-        $mealRate = $dashboardService->calculateMealRate($totalMeal, $totalShoppingExpense);
+        $monthlyData = $dashboardService->getMonthlyData($start, $end);
+        $monthlyStats = $dashboardService->getMonthlyStatistics($monthParam);
 
         return Inertia::render('dashboard/dashboard', [
-            'users' => $dashboardService->getUsersData($mealRate, $start, $end),
+            'users' => $monthlyData['users'],
             'statistics' => [
-                'totalBalance' => $balance,
-                'totalDeposits' => $totalDeposit,
-                'totalMeals' => $totalMeal,
-                'totalShoppingExpenses' => $totalShoppingExpense,
-                'mealCost' => $totalMeal * $mealRate,
-                'shoppingCost' => $totalShoppingExpense,
+                'totalBalance' => $monthlyData['balance'],
+                'totalDeposits' => $monthlyData['totalDeposits'],
+                'totalMeals' => $monthlyData['totalMeals'],
+                'totalShoppingExpenses' => $monthlyData['totalShoppingExpenses'],
+                'totalUtilities' => $monthlyData['totalUtilities'],
+                'mealCost' => $monthlyData['mealCost'],
+                'mealRate' => $monthlyData['mealRate'],
+                'shoppingCost' => $monthlyData['totalShoppingExpenses'],
             ],
+            'monthlyStats' => $monthlyStats,
             'currentMonth' => $monthParam,
             'formattedMonth' => $start->format('F Y'),
         ]);

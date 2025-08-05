@@ -19,9 +19,15 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // First run roles and permissions seeder
-        $this->call(RolesAndPermissionsSeeder::class);
+        $this->call(RolePermissionSeeder::class);
+        
+        // Create admin user
+        $this->call(AdminUserSeeder::class);
 
         User::factory(10)->create()->each(function (User $user) {
+            // Assign Member role to regular users
+            $user->assignRole('Member');
+            
             $user->meals()->saveMany(
                 Meal::factory()->count(rand(1, 10))->make()
             );

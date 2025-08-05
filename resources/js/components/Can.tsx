@@ -16,6 +16,12 @@ export function Can({ permission, role, children, fallback = null }: CanProps) {
         return <>{fallback}</>;
     }
 
+    // Check if user is Admin (admins can do everything)
+    const isAdmin = auth.user.roles?.some((r: any) => r.name === 'Admin') || false;
+    if (isAdmin) {
+        return <>{children}</>;
+    }
+
     // Check permission
     if (permission) {
         const hasPermission = auth.user.permissions?.some((p: any) => p.name === permission) || false;
