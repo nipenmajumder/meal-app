@@ -99,9 +99,13 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
         );
     };
 
-    const availableRoles = roles.filter(role => 
-        currentUserRoles.includes(role.name) || currentUserRoles.includes('super-admin')
-    );
+    // Admin can assign any role, others can only assign roles they have or roles below their level
+    const availableRoles = roles.filter(role => {
+        if (currentUserRoles.includes('Admin')) {
+            return true; // Admin can assign any role
+        }
+        return currentUserRoles.includes(role.name);
+    });
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

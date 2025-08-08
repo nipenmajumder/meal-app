@@ -47,19 +47,13 @@ final class UserController extends Controller
             ->withQueryString();
 
         $roles = Role::all();
-        $currentUserRoles = auth()->user()->roles->pluck('name')->toArray();
+        $currentUserRoles = request()->user()->roles->pluck('name')->toArray();
 
         return Inertia::render('users/Index', [
             'users' => $users,
             'roles' => $roles,
             'filters' => $request->only(['search', 'role', 'status']),
             'currentUserRoles' => $currentUserRoles,
-            'can' => [
-                'create_users' => auth()->user()->can('create users'),
-                'edit_users' => auth()->user()->can('edit users'),
-                'delete_users' => auth()->user()->can('delete users'),
-                'manage_user_status' => auth()->user()->can('manage user status'),
-            ],
         ]);
     }
 
@@ -69,7 +63,7 @@ final class UserController extends Controller
     public function create(): Response
     {
         $roles = Role::all();
-        $currentUserRoles = auth()->user()->roles->pluck('name')->toArray();
+        $currentUserRoles = request()->user()->roles->pluck('name')->toArray();
 
         return Inertia::render('Users/Create', [
             'roles' => $roles,
@@ -90,16 +84,18 @@ final class UserController extends Controller
         ]);
 
         if ($request->roles) {
-            // Ensure user cannot assign roles higher than their own
-            $userRoles = auth()->user()->roles->pluck('name')->toArray();
             $requestedRoles = is_array($request->roles) ? $request->roles : [$request->roles];
-
-            // Filter roles based on permission
-            $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
-                return in_array($role, $userRoles) || auth()->user()->hasRole('super-admin');
-            });
-
-            $user->assignRole($allowedRoles->toArray());
+            
+            // Admin can assign any role, others can only assign roles they have
+            if (request()->user()->hasRole('Admin')) {
+                $user->assignRole($requestedRoles);
+            } else {
+                $userRoles = request()->user()->roles->pluck('name')->toArray();
+                $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
+                    return in_array($role, $userRoles);
+                });
+                $user->assignRole($allowedRoles->toArray());
+            }
         }
 
         return redirect()->route('users.index')
@@ -125,7 +121,7 @@ final class UserController extends Controller
     {
         $user->load('roles');
         $roles = Role::all();
-        $currentUserRoles = auth()->user()->roles->pluck('name')->toArray();
+        $currentUserRoles = request()->user()->roles->pluck('name')->toArray();
 
         return Inertia::render('Users/Edit', [
             'user' => $user,
@@ -155,16 +151,18 @@ final class UserController extends Controller
         $user->update($updateData);
 
         if ($request->has('roles')) {
-            // Ensure user cannot assign roles higher than their own
-            $userRoles = auth()->user()->roles->pluck('name')->toArray();
             $requestedRoles = is_array($request->roles) ? $request->roles : [$request->roles];
-
-            // Filter roles based on permission
-            $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
-                return in_array($role, $userRoles) || auth()->user()->hasRole('super-admin');
-            });
-
-            $user->syncRoles($allowedRoles->toArray());
+            
+            // Admin can assign any role, others can only assign roles they have
+            if (request()->user()->hasRole('Admin')) {
+                $user->syncRoles($requestedRoles);
+            } else {
+                $userRoles = request()->user()->roles->pluck('name')->toArray();
+                $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
+                    return in_array($role, $userRoles);
+                });
+                $user->syncRoles($allowedRoles->toArray());
+            }
         }
 
         return redirect()->route('users.index')
@@ -177,7 +175,7 @@ final class UserController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         // Prevent user from deleting themselves
-        if ($user->id === auth()->id()) {
+        if ($user->id === request()->user()->id) {
             return redirect()->route('users.index')
                 ->with('error', 'You cannot delete your own account.');
         }
@@ -194,7 +192,7 @@ final class UserController extends Controller
     public function toggleStatus(User $user): RedirectResponse
     {
         // Prevent user from deactivating themselves
-        if ($user->id === auth()->id()) {
+        if ($user->id === request()->user()->id) {
             return redirect()->route('users.index')
                 ->with('error', 'You cannot change your own status.');
         }

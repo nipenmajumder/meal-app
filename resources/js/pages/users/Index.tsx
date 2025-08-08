@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Can } from '@/components/Can';
 import {
     Select,
     SelectContent,
@@ -41,16 +42,10 @@ interface UsersPageProps extends PageProps {
         status?: number;
     };
     currentUserRoles: string[];
-    can: {
-        create_users: boolean;
-        edit_users: boolean;
-        delete_users: boolean;
-        manage_user_status: boolean;
-    };
 }
 
 export default function UsersIndex() {
-    const { users, roles, filters, currentUserRoles, can, auth } = usePage<UsersPageProps>().props;
+    const { users, roles, filters, currentUserRoles, auth } = usePage<UsersPageProps>().props;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [selectedRole, setSelectedRole] = useState(filters.role || 'all');
     const [selectedStatus, setSelectedStatus] = useState(filters.status?.toString() || 'all');
@@ -170,7 +165,7 @@ export default function UsersIndex() {
                             Manage system users, assign roles, and control permissions
                         </p>
                     </div>
-                    {can.create_users && (
+                    <Can permission="create users">
                         <Button 
                             onClick={() => setIsCreateModalOpen(true)}
                             className="flex items-center gap-2"
@@ -178,7 +173,7 @@ export default function UsersIndex() {
                             <Plus className="h-4 w-4" />
                             Add New User
                         </Button>
-                    )}
+                    </Can>
                 </div>
 
                 {/* Simple Filters Section */}
@@ -314,7 +309,7 @@ export default function UsersIndex() {
                                     </ConsistentTableCell>
                                     <ConsistentTableCell className="py-4">
                                         <div className="flex justify-center gap-1">
-                                            {can.edit_users && (
+                                            <Can permission="edit users">
                                                 <Button 
                                                     variant="ghost" 
                                                     size="sm" 
@@ -323,31 +318,35 @@ export default function UsersIndex() {
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                            )}
-                                            {can.manage_user_status && user.id !== auth.user.id && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
-                                                    onClick={() => handleToggleStatus(user)}
-                                                    className="h-8 px-2"
-                                                >
-                                                    {user.status === 1 ? (
-                                                        <PowerOff className="h-4 w-4" />
-                                                    ) : (
-                                                        <Power className="h-4 w-4" />
-                                                    )}
-                                                </Button>
-                                            )}
-                                            {can.delete_users && user.id !== auth.user.id && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
-                                                    onClick={() => setDeletingUser(user)}
-                                                    className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            )}
+                                            </Can>
+                                            <Can permission="manage user status">
+                                                {user.id !== auth.user.id && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => handleToggleStatus(user)}
+                                                        className="h-8 px-2"
+                                                    >
+                                                        {user.status === 1 ? (
+                                                            <PowerOff className="h-4 w-4" />
+                                                        ) : (
+                                                            <Power className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                )}
+                                            </Can>
+                                            <Can permission="delete users">
+                                                {user.id !== auth.user.id && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => setDeletingUser(user)}
+                                                        className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </Can>
                                         </div>
                                     </ConsistentTableCell>
                                 </ConsistentTableRow>
@@ -361,7 +360,7 @@ export default function UsersIndex() {
                                         <p className="text-sm text-muted-foreground">
                                             No users match your current filters.
                                         </p>
-                                        {can.create_users && (
+                                        <Can permission="create users">
                                             <Button 
                                                 onClick={() => setIsCreateModalOpen(true)}
                                                 size="sm"
@@ -370,7 +369,7 @@ export default function UsersIndex() {
                                                 <Plus className="h-4 w-4 mr-2" />
                                                 Create User
                                             </Button>
-                                        )}
+                                        </Can>
                                     </div>
                                 </td>
                             </tr>

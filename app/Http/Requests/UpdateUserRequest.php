@@ -33,7 +33,7 @@ final class UpdateUserRequest extends FormRequest
                 'max:255',
                 Rule::unique('users')->ignore($this->user),
             ],
-            'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
+            // 'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
             'status' => ['sometimes', 'integer', 'in:0,1'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['exists:roles,name'],
