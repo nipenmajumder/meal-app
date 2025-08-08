@@ -83,6 +83,8 @@ final class ShoppingExpenseController extends Controller
 
     public function destroy(ShoppingExpense $shoppingExpense)
     {
+        $this->authorize('delete shopping expenses');
+        
         $monthKey = $shoppingExpense->date->format('Y-m');
         $shoppingExpense->delete();
 
@@ -94,6 +96,8 @@ final class ShoppingExpenseController extends Controller
 
     public function export(Request $request)
     {
+        $this->authorize('export shopping expenses');
+        
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
 

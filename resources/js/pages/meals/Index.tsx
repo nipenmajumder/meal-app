@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
@@ -207,164 +208,170 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                     </div>
 
                     <div className="flex items-center space-x-2">
-                        <Button variant="outline" onClick={handleExport}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Export
-                        </Button>
+                        <Can permission="export meals">
+                            <Button variant="outline" onClick={handleExport}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Export
+                            </Button>
+                        </Can>
                         
-                        <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline">
-                                    <Users className="mr-2 h-4 w-4" />
-                                    Bulk Add
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Add Meals for All Users</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleBulkSubmit} className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="bulk_date">Date</Label>
-                                        <Input
-                                            id="bulk_date"
-                                            type="date"
-                                            value={bulkFormData.date}
-                                            onChange={(e) => setBulkData('date', e.target.value)}
-                                            max={new Date().toISOString().split('T')[0]}
-                                        />
-                                        {bulkErrors.date && (
-                                            <p className="text-red-500 text-sm mt-1">{bulkErrors.date}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="max-h-96 overflow-y-auto">
-                                        <Label className="text-base font-semibold">Meal Counts for Each User</Label>
-                                        <div className="grid gap-3 mt-2">
-                                            {users.map((user) => (
-                                                <div key={user.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                                                    <div className="flex-1">
-                                                        <Label className="font-medium">{user.name}</Label>
-                                                    </div>
-                                                    <div className="w-32">
-                                                        <Input
-                                                            type="number"
-                                                            step="0.5"
-                                                            min="0"
-                                                            max="10"
-                                                            value={bulkFormData.meals[user.id.toString()] || ''}
-                                                            onChange={(e) => updateBulkMeal(user.id.toString(), e.target.value)}
-                                                            placeholder="0"
-                                                            className="text-center"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
+                        <Can permission="bulk import meals">
+                            <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">
+                                        <Users className="mr-2 h-4 w-4" />
+                                        Bulk Add
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                        <DialogTitle>Add Meals for All Users</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleBulkSubmit} className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="bulk_date">Date</Label>
+                                            <Input
+                                                id="bulk_date"
+                                                type="date"
+                                                value={bulkFormData.date}
+                                                onChange={(e) => setBulkData('date', e.target.value)}
+                                                max={new Date().toISOString().split('T')[0]}
+                                            />
+                                            {bulkErrors.date && (
+                                                <p className="text-red-500 text-sm mt-1">{bulkErrors.date}</p>
+                                            )}
                                         </div>
-                                        <p className="text-sm text-muted-foreground mt-2">
-                                            Leave empty or enter 0 for users who didn't have meals
-                                        </p>
-                                    </div>
 
-                                    <div className="flex justify-end space-x-2 pt-4 border-t">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setIsBulkDialogOpen(false)}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={bulkProcessing}>
-                                            {bulkProcessing ? 'Saving...' : 'Save All Meals'}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-                        
-                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button>
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Add Meal
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add Meal Record</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="user_id">User</Label>
-                                        <Select
-                                            value={formData.user_id}
-                                            onValueChange={(value) => setData('user_id', value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a user" />
-                                            </SelectTrigger>
-                                            <SelectContent>
+                                        <div className="max-h-96 overflow-y-auto">
+                                            <Label className="text-base font-semibold">Meal Counts for Each User</Label>
+                                            <div className="grid gap-3 mt-2">
                                                 {users.map((user) => (
-                                                    <SelectItem key={user.id} value={user.id.toString()}>
-                                                        {user.name}
-                                                    </SelectItem>
+                                                    <div key={user.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                                                        <div className="flex-1">
+                                                            <Label className="font-medium">{user.name}</Label>
+                                                        </div>
+                                                        <div className="w-32">
+                                                            <Input
+                                                                type="number"
+                                                                step="0.5"
+                                                                min="0"
+                                                                max="10"
+                                                                value={bulkFormData.meals[user.id.toString()] || ''}
+                                                                onChange={(e) => updateBulkMeal(user.id.toString(), e.target.value)}
+                                                                placeholder="0"
+                                                                className="text-center"
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.user_id && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
-                                        )}
-                                    </div>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground mt-2">
+                                                Leave empty or enter 0 for users who didn't have meals
+                                            </p>
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="date">Date</Label>
-                                        <Input
-                                            id="date"
-                                            type="date"
-                                            value={formData.date}
-                                            onChange={(e) => setData('date', e.target.value)}
-                                            max={new Date().toISOString().split('T')[0]}
-                                        />
-                                        {errors.date && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.date}</p>
-                                        )}
-                                    </div>
+                                        <div className="flex justify-end space-x-2 pt-4 border-t">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setIsBulkDialogOpen(false)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={bulkProcessing}>
+                                                {bulkProcessing ? 'Saving...' : 'Save All Meals'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </Can>
+                        
+                        <Can permission="create meals">
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Meal
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add Meal Record</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="user_id">User</Label>
+                                            <Select
+                                                value={formData.user_id}
+                                                onValueChange={(value) => setData('user_id', value)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a user" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {users.map((user) => (
+                                                        <SelectItem key={user.id} value={user.id.toString()}>
+                                                            {user.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.user_id && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="meal_count">Meal Count</Label>
-                                        <Input
-                                            id="meal_count"
-                                            type="number"
-                                            step="0.5"
-                                            min="0"
-                                            max="10"
-                                            value={formData.meal_count}
-                                            onChange={(e) => setData('meal_count', e.target.value)}
-                                            placeholder="0"
-                                        />
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Enter the number of meals (e.g., 1, 1.5, 2)
-                                        </p>
-                                        {errors.meal_count && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.meal_count}</p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="date">Date</Label>
+                                            <Input
+                                                id="date"
+                                                type="date"
+                                                value={formData.date}
+                                                onChange={(e) => setData('date', e.target.value)}
+                                                max={new Date().toISOString().split('T')[0]}
+                                            />
+                                            {errors.date && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                                            )}
+                                        </div>
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setIsAddDialogOpen(false)}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={processing}>
-                                            {processing ? 'Saving...' : 'Save'}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                                        <div>
+                                            <Label htmlFor="meal_count">Meal Count</Label>
+                                            <Input
+                                                id="meal_count"
+                                                type="number"
+                                                step="0.5"
+                                                min="0"
+                                                max="10"
+                                                value={formData.meal_count}
+                                                onChange={(e) => setData('meal_count', e.target.value)}
+                                                placeholder="0"
+                                            />
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                Enter the number of meals (e.g., 1, 1.5, 2)
+                                            </p>
+                                            {errors.meal_count && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.meal_count}</p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex justify-end space-x-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setIsAddDialogOpen(false)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={processing}>
+                                                {processing ? 'Saving...' : 'Save'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </Can>
                     </div>
                 </div>
 
@@ -378,7 +385,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                             {userNames.map((name) => (
                                 <ConsistentTableHead key={name}>
                                     <div className="flex items-center justify-center gap-1">
-                                        🍽️ {name}
+                                     {name}
                                     </div>
                                 </ConsistentTableHead>
                             ))}

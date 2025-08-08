@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
@@ -189,104 +190,108 @@ export default function ShoppingExpenses({ userNames, data, users, currentMonth,
                     </div>
 
                     <div className="flex items-center space-x-2">
-                        <Button variant="outline" onClick={handleExport}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Export
-                        </Button>
+                        <Can permission="export shopping expenses">
+                            <Button variant="outline" onClick={handleExport}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Export
+                            </Button>
+                        </Can>
                         
-                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button>
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Add Expense
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add New Shopping Expense</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="user_id">User</Label>
-                                        <Select
-                                            value={formData.user_id}
-                                            onValueChange={(value) => setData('user_id', value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a user" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {users.map((user) => (
-                                                    <SelectItem key={user.id} value={user.id.toString()}>
-                                                        {user.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.user_id && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
-                                        )}
-                                    </div>
+                        <Can permission="create shopping expenses">
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Expense
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add New Shopping Expense</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="user_id">User</Label>
+                                            <Select
+                                                value={formData.user_id}
+                                                onValueChange={(value) => setData('user_id', value)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a user" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {users.map((user) => (
+                                                        <SelectItem key={user.id} value={user.id.toString()}>
+                                                            {user.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.user_id && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="date">Date</Label>
-                                        <Input
-                                            id="date"
-                                            type="date"
-                                            value={formData.date}
-                                            onChange={(e) => setData('date', e.target.value)}
-                                            max={new Date().toISOString().split('T')[0]}
-                                        />
-                                        {errors.date && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.date}</p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="date">Date</Label>
+                                            <Input
+                                                id="date"
+                                                type="date"
+                                                value={formData.date}
+                                                onChange={(e) => setData('date', e.target.value)}
+                                                max={new Date().toISOString().split('T')[0]}
+                                            />
+                                            {errors.date && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="amount">Amount</Label>
-                                        <Input
-                                            id="amount"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            max="99999.99"
-                                            value={formData.amount}
-                                            onChange={(e) => setData('amount', e.target.value)}
-                                            placeholder="0.00"
-                                        />
-                                        {errors.amount && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="amount">Amount</Label>
+                                            <Input
+                                                id="amount"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="99999.99"
+                                                value={formData.amount}
+                                                onChange={(e) => setData('amount', e.target.value)}
+                                                placeholder="0.00"
+                                            />
+                                            {errors.amount && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="description">Description (Optional)</Label>
-                                        <Input
-                                            id="description"
-                                            value={formData.description}
-                                            onChange={(e) => setData('description', e.target.value)}
-                                            placeholder="What was purchased..."
-                                        />
-                                        {errors.description && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                                        )}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="description">Description (Optional)</Label>
+                                            <Input
+                                                id="description"
+                                                value={formData.description}
+                                                onChange={(e) => setData('description', e.target.value)}
+                                                placeholder="What was purchased..."
+                                            />
+                                            {errors.description && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                                            )}
+                                        </div>
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setIsAddDialogOpen(false)}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={processing}>
-                                            {processing ? 'Saving...' : 'Save'}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                                        <div className="flex justify-end space-x-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setIsAddDialogOpen(false)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={processing}>
+                                                {processing ? 'Saving...' : 'Save'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </Can>
                     </div>
                 </div>
 
@@ -300,7 +305,7 @@ export default function ShoppingExpenses({ userNames, data, users, currentMonth,
                             {userNames.map((name) => (
                                 <ConsistentTableHead key={name}>
                                     <div className="flex items-center justify-center gap-1">
-                                        🛒 {name}
+                                     {name}
                                     </div>
                                 </ConsistentTableHead>
                             ))}

@@ -19,6 +19,16 @@ final class Deposit extends Model
         'amount',
     ];
 
+    // Validation rules
+    public static function validationRules(): array
+    {
+        return [
+            'user_id' => ['required', 'exists:users,id'],
+            'date' => ['required', 'date', 'before_or_equal:today'],
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999.99'],
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -38,16 +48,6 @@ final class Deposit extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
-    }
-
-    // Validation rules
-    public static function validationRules(): array
-    {
-        return [
-            'user_id' => ['required', 'exists:users,id'],
-            'date' => ['required', 'date', 'before_or_equal:today'],
-            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999.99'],
-        ];
     }
 
     protected function casts(): array

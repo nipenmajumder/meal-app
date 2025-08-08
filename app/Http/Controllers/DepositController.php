@@ -85,6 +85,8 @@ final class DepositController extends Controller
 
     public function destroy(Deposit $deposit)
     {
+        $this->authorize('delete deposits');
+        
         $monthKey = $deposit->date->format('Y-m');
         $deposit->delete();
 
@@ -96,6 +98,8 @@ final class DepositController extends Controller
 
     public function export(Request $request)
     {
+        $this->authorize('export deposits');
+        
         // Get month from request or default to current month
         $monthParam = $request->query('month', now()->format('Y-m'));
 

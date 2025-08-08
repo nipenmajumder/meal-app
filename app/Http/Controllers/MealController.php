@@ -70,6 +70,8 @@ final class MealController extends Controller
 
     public function bulkStore(Request $request): RedirectResponse
     {
+        $this->authorize('bulk import meals');
+        
         $request->validate([
             'date' => 'required|date|before_or_equal:today',
             'meals' => 'required|array',
@@ -115,6 +117,8 @@ final class MealController extends Controller
 
     public function destroy(Meal $meal): RedirectResponse
     {
+        $this->authorize('delete meals');
+        
         $month = $meal->date->format('Y-m');
         $meal->delete();
 
@@ -127,6 +131,8 @@ final class MealController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
+        $this->authorize('export meals');
+        
         $month = $request->query('month', now()->format('Y-m'));
         $data = $this->transformMealData($month);
         $users = User::all();

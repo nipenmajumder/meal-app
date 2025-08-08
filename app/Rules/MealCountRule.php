@@ -7,7 +7,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class MealCountRule implements ValidationRule
+final class MealCountRule implements ValidationRule
 {
     /**
      * Run the validation rule.
@@ -19,21 +19,24 @@ class MealCountRule implements ValidationRule
         }
 
         $mealCount = (float) $value;
-        
+
         // Check if it's a valid number
-        if (!is_numeric($value)) {
+        if (! is_numeric($value)) {
             $fail('The :attribute must be a valid number.');
+
             return;
         }
 
         // Check range
         if ($mealCount < 0) {
             $fail('The :attribute cannot be negative.');
+
             return;
         }
 
         if ($mealCount > 10) {
             $fail('The :attribute cannot exceed 10 meals.');
+
             return;
         }
 

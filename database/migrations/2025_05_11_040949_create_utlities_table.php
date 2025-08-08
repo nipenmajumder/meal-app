@@ -16,9 +16,16 @@ return new class extends Migration
         Schema::create('utilities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->date('month')->index();
-            $table->decimal('amount', 10);
+            $table->date('date'); // Changed from month to date for consistency
+            $table->decimal('amount', 10, 2); // Added decimal precision
             $table->timestamps();
+
+            // Add user relationship
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            // Add indexes for better performance
+            $table->index(['user_id', 'date']);
+            $table->index('date');
         });
     }
 

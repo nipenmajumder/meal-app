@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class AdminUserSeeder extends Seeder
+final class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
@@ -22,7 +24,7 @@ class AdminUserSeeder extends Seeder
         );
 
         // Assign Admin role
-        if (!$adminUser->hasRole('Admin')) {
+        if (! $adminUser->hasRole('Admin')) {
             $adminUser->assignRole('Admin');
         }
 

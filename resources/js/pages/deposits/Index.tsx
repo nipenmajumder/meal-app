@@ -12,6 +12,7 @@ import {
     ConsistentTableHead,
     ScrollableTableContainer,
 } from '@/components/consistent-table';
+import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -49,7 +50,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Deposits({ userNames, data, users, currentMonth, }: Props) {
+export default function Deposits({ userNames, data, users, currentMonth }: Props) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
@@ -165,217 +166,224 @@ export default function Deposits({ userNames, data, users, currentMonth, }: Prop
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daily Contributions" />
 
-            <div className="p-3 sm:p-4 lg:p-6 max-w-full">
+            <div className="p-4">
                 {/* Month Navigation and Stats */}
-                <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center space-x-4">
                         <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">Deposits - {getCurrentMonth()}</h1>
+                        <h1 className="text-2xl font-bold">Deposits - {getCurrentMonth()}</h1>
                         <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={downloadTemplate}>
-                            <FileText className="mr-1 sm:mr-2 h-4 w-4" />
-                            <span className="hidden sm:inline">Template</span>
+                    <div className="flex items-center space-x-2">
+                        <Button variant="outline" onClick={downloadTemplate}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Template
                         </Button>
 
-                        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                    <Upload className="mr-1 sm:mr-2 h-4 w-4" />
-                                    <span className="hidden sm:inline">Import</span>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Import Deposits</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleImportSubmit} className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="file">CSV File</Label>
-                                        <Input
-                                            id="file"
-                                            type="file"
-                                            accept=".csv,.txt"
-                                            onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                                        />
-                                        <p className="text-muted-foreground mt-1 text-sm">Upload a CSV file with columns: user_id, date, amount</p>
-                                    </div>
+                        <Can permission="bulk import deposits">
+                            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Import
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Import Deposits</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleImportSubmit} className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="file">CSV File</Label>
+                                            <Input
+                                                id="file"
+                                                type="file"
+                                                accept=".csv,.txt"
+                                                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                                            />
+                                            <p className="text-muted-foreground mt-1 text-sm">Upload a CSV file with columns: user_id, date, amount</p>
+                                        </div>
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button type="button" variant="outline" onClick={() => setIsImportDialogOpen(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={!importFile}>
-                                            Import
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                                        <div className="flex justify-end space-x-2">
+                                            <Button type="button" variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={!importFile}>
+                                                Import
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </Can>
 
-                        <Button variant="outline" size="sm" onClick={handleExport}>
-                            <Download className="mr-1 sm:mr-2 h-4 w-4" />
-                            <span className="hidden sm:inline">Export</span>
-                        </Button>
+                        <Can permission="export deposits">
+                            <Button variant="outline" onClick={handleExport}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Export
+                            </Button>
+                        </Can>
 
-                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button size="sm">
-                                    <PlusCircle className="mr-1 sm:mr-2 h-4 w-4" />
-                                    <span className="hidden sm:inline">Add Deposit</span>
-                                    <span className="sm:hidden">Add</span>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add New Deposit</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="user_id">User</Label>
-                                        <Select value={formData.user_id} onValueChange={(value) => setData('user_id', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a user" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {users.map((user) => (
-                                                    <SelectItem key={user.id} value={user.id.toString()}>
-                                                        {user.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.user_id && <p className="mt-1 text-sm text-red-500">{errors.user_id}</p>}
-                                    </div>
+                        <Can permission="create deposits">
+                            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Deposit
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add New Deposit</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="user_id">User</Label>
+                                            <Select value={formData.user_id} onValueChange={(value) => setData('user_id', value)}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a user" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {users.map((user) => (
+                                                        <SelectItem key={user.id} value={user.id.toString()}>
+                                                            {user.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.user_id && <p className="mt-1 text-sm text-red-500">{errors.user_id}</p>}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="date">Date</Label>
-                                        <Input
-                                            id="date"
-                                            type="date"
-                                            value={formData.date}
-                                            onChange={(e) => setData('date', e.target.value)}
-                                            max={new Date().toISOString().split('T')[0]}
-                                        />
-                                        {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="date">Date</Label>
+                                            <Input
+                                                id="date"
+                                                type="date"
+                                                value={formData.date}
+                                                onChange={(e) => setData('date', e.target.value)}
+                                                max={new Date().toISOString().split('T')[0]}
+                                            />
+                                            {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
+                                        </div>
 
-                                    <div>
-                                        <Label htmlFor="amount">Amount</Label>
-                                        <Input
-                                            id="amount"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            max="99999.99"
-                                            value={formData.amount}
-                                            onChange={(e) => setData('amount', e.target.value)}
-                                            placeholder="0.00"
-                                        />
-                                        {errors.amount && <p className="mt-1 text-sm text-red-500">{errors.amount}</p>}
-                                    </div>
+                                        <div>
+                                            <Label htmlFor="amount">Amount</Label>
+                                            <Input
+                                                id="amount"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                max="99999.99"
+                                                value={formData.amount}
+                                                onChange={(e) => setData('amount', e.target.value)}
+                                                placeholder="0.00"
+                                            />
+                                            {errors.amount && <p className="mt-1 text-sm text-red-500">{errors.amount}</p>}
+                                        </div>
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={processing}>
-                                            {processing ? 'Saving...' : 'Save'}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                                        <div className="flex justify-end space-x-2">
+                                            <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={processing}>
+                                                {processing ? 'Saving...' : 'Save'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </Can>
                     </div>
                 </div>
 
                 {/* Enhanced User-Friendly Table */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg border shadow-sm">
-                    <div className="max-h-[70vh] overflow-y-auto">
-                        <ConsistentTable>
-                            <ConsistentTableHeader className="sticky top-0 z-10">
-                                <ConsistentTableRow>
-                                    <ConsistentTableHead className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 min-w-[120px] sm:min-w-[160px]">
-                                        Date
-                                    </ConsistentTableHead>
-                                    {userNames.map((name) => (
-                                        <ConsistentTableHead key={name} className="bg-gray-50 dark:bg-gray-800 min-w-[100px] sm:min-w-[120px]">
-                                            <div className="flex items-center justify-center gap-1">
-                                                <span className="hidden sm:inline">👤</span>
-                                                <span className="text-xs sm:text-sm truncate">{name}</span>
-                                            </div>
-                                        </ConsistentTableHead>
-                                    ))}
-                                </ConsistentTableRow>
-                            </ConsistentTableHeader>
-                            <tbody>
-                                {data.map((row, idx) => {
-                                    const isEvenRow = idx % 2 === 0;
-                                    const dateObj = new Date(row.date.split('-').reverse().join('-'));
-                                    const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
+                <ScrollableTableContainer>
+                    <ConsistentTableHeader>
+                        <ConsistentTableRow>
+                            <ConsistentTableHead isSticky>
+                                Date
+                            </ConsistentTableHead>
+                            {userNames.map((name) => (
+                                <ConsistentTableHead key={name}>
+                                    <div className="flex items-center justify-center gap-1">
+                                     {name}
+                                    </div>
+                                </ConsistentTableHead>
+                            ))}
+                        </ConsistentTableRow>
+                    </ConsistentTableHeader>
+                    <tbody>
+                        {data.map((row, idx) => {
+                            const isEvenRow = idx % 2 === 0;
+                            const dateObj = new Date(row.date.split('-').reverse().join('-'));
+                            const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
 
-                                    return (
-                                        <ConsistentTableRow key={idx} className={`${isEvenRow ? 'bg-gray-50/30 dark:bg-gray-800/30' : ''} hover:bg-gray-100 dark:hover:bg-gray-700/50`}>
-                                            <ConsistentTableCell className="sticky left-0 z-10 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 min-w-[120px] sm:min-w-[160px]">
-                                                <div className="flex flex-col py-2">
-                                                    <span className="text-xs sm:text-sm font-semibold text-center">{formattedDate}</span>
-                                                </div>
-                                            </ConsistentTableCell>
-                                            {userNames.map((name) => {
-                                                const value = row[name];
-
-                                                return (
-                                                    <ConsistentTableCell key={name} className={`${getCellClassName(value)} text-center py-3`}>
-                                                        <div className="flex justify-center">
-                                                            {value && Number(value) !== 0 ? (
-                                                                <Badge
-                                                                    variant={getAmountBadgeVariant(value)}
-                                                                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium"
-                                                                >
-                                                                    {formatCurrency(value)}
-                                                                </Badge>
-                                                            ) : (
-                                                                <span className="text-lg text-muted-foreground">—</span>
-                                                            )}
-                                                        </div>
-                                                    </ConsistentTableCell>
-                                                );
-                                            })}
-                                        </ConsistentTableRow>
-                                    );
-                                })}
-
-                                {/* Summation Row */}
-                                <ConsistentTableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-t-2 border-blue-200 dark:border-blue-700">
-                                    <ConsistentTableCell className="sticky left-0 z-10 bg-blue-50 dark:bg-blue-900/20 border-r border-blue-200 dark:border-blue-700">
-                                        <div className="flex flex-col py-3">
-                                            <span className="text-center text-sm font-bold text-blue-900 dark:text-blue-100">TOTAL</span>
+                            return (
+                                <ConsistentTableRow key={idx} isEvenRow={isEvenRow}>
+                                    <ConsistentTableCell isSticky>
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-center text-sm">
+                                                {formattedDate}
+                                            </span>
                                         </div>
                                     </ConsistentTableCell>
                                     {userNames.map((name) => {
-                                        const columnTotal = calculateColumnTotal(name);
+                                        const value = row[name];
 
                                         return (
-                                            <ConsistentTableCell key={name} className="text-center py-3">
+                                            <ConsistentTableCell key={name} className={getCellClassName(value)}>
                                                 <div className="flex justify-center">
-                                                    <Badge variant="default" className="bg-primary px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold hover:bg-primary/90">
-                                                        {formatCurrency(columnTotal)}
-                                                    </Badge>
+                                                    {value && Number(value) !== 0 ? (
+                                                        <Badge
+                                                            variant={getAmountBadgeVariant(value)}
+                                                            className="text-sm font-medium px-3 py-1"
+                                                        >
+                                                            {formatCurrency(value)}
+                                                        </Badge>
+                                                    ) : (
+                                                        <span className="text-muted-foreground text-lg">—</span>
+                                                    )}
                                                 </div>
                                             </ConsistentTableCell>
                                         );
                                     })}
                                 </ConsistentTableRow>
-                            </tbody>
-                        </ConsistentTable>
-                    </div>
-                </div>
+                            );
+                        })}
+
+                        {/* Summation Row */}
+                        <ConsistentTableRow isSummaryRow>
+                            <ConsistentTableCell isSticky>
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-center text-sm">
+                                        TOTAL
+                                    </span>
+                                </div>
+                            </ConsistentTableCell>
+                            {userNames.map((name) => {
+                                const columnTotal = calculateColumnTotal(name);
+
+                                return (
+                                    <ConsistentTableCell key={name}>
+                                        <div className="flex justify-center">
+                                            <Badge 
+                                                variant="default"
+                                                className="text-sm font-bold px-3 py-1 bg-primary hover:bg-primary/90"
+                                            >
+                                                {formatCurrency(columnTotal)}
+                                            </Badge>
+                                        </div>
+                                    </ConsistentTableCell>
+                                );
+                            })}
+                        </ConsistentTableRow>
+                    </tbody>
+                </ScrollableTableContainer>
             </div>
         </AppLayout>
     );

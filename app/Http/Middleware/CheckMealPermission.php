@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckMealPermission
+final class CheckMealPermission
 {
     /**
      * Handle an incoming request.
@@ -23,12 +25,12 @@ class CheckMealPermission
         // Check role-based permissions
         if ($user) {
             $userRoles = $user->roles->pluck('name')->toArray();
-            
+
             // Admins and Meal Managers can manage everything
             if (in_array('Admin', $userRoles) || in_array('Meal Manager', $userRoles)) {
                 return $next($request);
             }
-            
+
             // Members can only view
             if (in_array('Member', $userRoles) && str_contains($permission, 'view')) {
                 return $next($request);

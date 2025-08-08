@@ -16,9 +16,17 @@ return new class extends Migration
         Schema::create('shopping_expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->date('date')->index();
-            $table->decimal('amount', 10);
+            $table->date('date');
+            $table->decimal('amount', 10, 2);
+            $table->text('description')->nullable(); // Added description column
             $table->timestamps();
+
+            // Add user relationship
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            // Add indexes for better performance
+            $table->index(['user_id', 'date']);
+            $table->index('date');
         });
     }
 

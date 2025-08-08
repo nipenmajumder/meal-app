@@ -28,6 +28,17 @@ final class ShoppingExpense extends Model
         'amount' => 'decimal:2',
     ];
 
+    // Validation rules
+    public static function validationRules(): array
+    {
+        return [
+            'user_id' => ['required', 'exists:users,id'],
+            'date' => ['required', 'date', 'before_or_equal:today'],
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999.99'],
+            'description' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -47,16 +58,5 @@ final class ShoppingExpense extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
-    }
-
-    // Validation rules
-    public static function validationRules(): array
-    {
-        return [
-            'user_id' => ['required', 'exists:users,id'],
-            'date' => ['required', 'date', 'before_or_equal:today'],
-            'amount' => ['required', 'numeric', 'min:0.01', 'max:999999.99'],
-            'description' => ['nullable', 'string', 'max:255'],
-        ];
     }
 }

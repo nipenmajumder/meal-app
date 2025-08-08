@@ -93,7 +93,7 @@ final class UserController extends Controller
             // Ensure user cannot assign roles higher than their own
             $userRoles = auth()->user()->roles->pluck('name')->toArray();
             $requestedRoles = is_array($request->roles) ? $request->roles : [$request->roles];
-            
+
             // Filter roles based on permission
             $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
                 return in_array($role, $userRoles) || auth()->user()->hasRole('super-admin');
@@ -158,7 +158,7 @@ final class UserController extends Controller
             // Ensure user cannot assign roles higher than their own
             $userRoles = auth()->user()->roles->pluck('name')->toArray();
             $requestedRoles = is_array($request->roles) ? $request->roles : [$request->roles];
-            
+
             // Filter roles based on permission
             $allowedRoles = collect($requestedRoles)->filter(function ($role) use ($userRoles) {
                 return in_array($role, $userRoles) || auth()->user()->hasRole('super-admin');

@@ -17,7 +17,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Test route for debugging (no auth required)
-Route::get('test/scopes', [\App\Http\Controllers\TestController::class, 'testScopes'])->name('test.scopes');
+Route::get('test/scopes', [App\Http\Controllers\TestController::class, 'testScopes'])->name('test.scopes');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

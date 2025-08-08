@@ -20,23 +20,23 @@ final class DatabaseSeeder extends Seeder
     {
         // First run roles and permissions seeder
         $this->call(RolePermissionSeeder::class);
-        
+
         // Create admin user
         $this->call(AdminUserSeeder::class);
 
         User::factory(10)->create()->each(function (User $user) {
             // Assign Member role to regular users
             $user->assignRole('Member');
-            
-            $user->meals()->saveMany(
-                Meal::factory()->count(rand(1, 10))->make()
-            );
-            $user->deposits()->saveMany(
-                Deposit::factory()->count(rand(1, 5))->make()
-            );
-            $user->shoppingExpenses()->saveMany(
-                ShoppingExpense::factory()->count(rand(1, 5))->make()
-            );
+
+            // $user->meals()->saveMany(
+            //     Meal::factory()->count(rand(1, 10))->make()
+            // );
+            // $user->deposits()->saveMany(
+            //     Deposit::factory()->count(rand(1, 5))->make()
+            // );
+            // $user->shoppingExpenses()->saveMany(
+            //     ShoppingExpense::factory()->count(rand(1, 5))->make()
+            // );
         });
     }
 }

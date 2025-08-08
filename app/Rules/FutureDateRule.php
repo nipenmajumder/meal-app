@@ -7,7 +7,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class FutureDateRule implements ValidationRule
+final class FutureDateRule implements ValidationRule
 {
     /**
      * Run the validation rule.

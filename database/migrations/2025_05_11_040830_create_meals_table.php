@@ -16,9 +16,16 @@ return new class extends Migration
         Schema::create('meals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->date('date')->index();
-            $table->float('meal_count');
+            $table->date('date');
+            $table->decimal('meal_count', 3, 1); // Changed from float to decimal for better precision
             $table->timestamps();
+
+            // Add composite index for better query performance
+            $table->index(['user_id', 'date']);
+            $table->index('date');
+
+            // Add unique constraint to prevent duplicate entries
+            $table->unique(['user_id', 'date']);
         });
     }
 

@@ -8,7 +8,6 @@ use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Permission;
@@ -39,7 +38,7 @@ final class RoleController extends Controller
             ->withQueryString();
 
         $permissions = Permission::all();
-        
+
         // Create role permissions mapping for all roles (not just paginated ones)
         $allRoles = Role::with('permissions')->get();
         $rolePermissions = [];
@@ -160,9 +159,9 @@ final class RoleController extends Controller
 
         foreach ($request->rolePermissions as $roleId => $permissionIds) {
             $role = Role::findOrFail($roleId);
-            
+
             // Prevent modification of super-admin role unless user is super-admin
-            if ($role->name === 'super-admin' && !request()->user()->hasRole('super-admin')) {
+            if ($role->name === 'super-admin' && ! request()->user()->hasRole('super-admin')) {
                 continue;
             }
 
@@ -200,7 +199,7 @@ final class RoleController extends Controller
         ]);
 
         // Prevent modification of super-admin role unless user is super-admin
-        if ($role->name === 'super-admin' && !request()->user()->hasRole('super-admin')) {
+        if ($role->name === 'super-admin' && ! request()->user()->hasRole('super-admin')) {
             return redirect()->back()->with('error', 'You cannot modify super-admin permissions.');
         }
 
