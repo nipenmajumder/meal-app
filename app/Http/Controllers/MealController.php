@@ -221,8 +221,11 @@ final class MealController extends Controller
             ->distinct('user_id')
             ->count();
 
+        // Ensure totalMeals is properly converted to a number
+        $totalMealsFloat = is_numeric($totalMeals) ? (float) $totalMeals : 0.0;
+
         return [
-            'totalMeals' => number_format($totalMeals, 1),
+            'totalMeals' => number_format($totalMealsFloat, 1),
             'mealCount' => $mealCount,
             'activeUsers' => $activeUsers,
         ];

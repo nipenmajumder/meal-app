@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
     ConsistentTable,
     ConsistentTableHeader,
@@ -64,10 +65,26 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         errors,
     } = useForm({
         user_id: '',
-        date: '',
+        date: new Date().toISOString().split('T')[0],
         amount: '',
     });
 
+    // Helper functions for date handling
+    const getDateFromString = (dateString: string): Date | undefined => {
+        if (!dateString) return undefined;
+        // Create date in local timezone to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const getStringFromDate = (date: Date | undefined): string => {
+        if (!date) return '';
+        // Use local date to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
 
     // Helper functions
@@ -80,6 +97,7 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
             minimumFractionDigits: 2,
         }).format(num);
     };
+
     const calculateColumnTotal = (userName: string): number => {
         return data.reduce((sum, row) => {
             const value = Number(row[userName]) || 0;
@@ -261,12 +279,12 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
 
                                         <div>
                                             <Label htmlFor="date">Date</Label>
-                                            <Input
-                                                id="date"
-                                                type="date"
-                                                value={formData.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                max={new Date().toISOString().split('T')[0]}
+                                            <DatePicker
+                                                date={getDateFromString(formData.date)}
+                                                onSelect={(date) => setData('date', getStringFromDate(date))}
+                                                placeholder="Select date"
+                                                disabled={processing}
+                                                className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
                                             {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
                                         </div>

@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -75,7 +76,7 @@ export default function ShoppingExpenses({ userNames, data, users, currentMonth,
 
     const { data: formData, setData, post, processing, reset, errors } = useForm({
         user_id: '',
-        date: '',
+        date: new Date().toISOString().split('T')[0],
         amount: '',
         description: '',
     });
@@ -89,6 +90,23 @@ export default function ShoppingExpenses({ userNames, data, users, currentMonth,
             currency: 'USD',
             minimumFractionDigits: 2,
         }).format(num);
+    };
+
+    // Helper functions for date handling
+    const getDateFromString = (dateString: string): Date | undefined => {
+        if (!dateString) return undefined;
+        // Create date in local timezone to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const getStringFromDate = (date: Date | undefined): string => {
+        if (!date) return '';
+        // Use local date to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     const calculateRowTotal = (row: ShoppingExpenses): number => {
@@ -234,12 +252,12 @@ export default function ShoppingExpenses({ userNames, data, users, currentMonth,
 
                                         <div>
                                             <Label htmlFor="date">Date</Label>
-                                            <Input
-                                                id="date"
-                                                type="date"
-                                                value={formData.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                max={new Date().toISOString().split('T')[0]}
+                                            <DatePicker
+                                                date={getDateFromString(formData.date)}
+                                                onSelect={(date) => setData('date', getStringFromDate(date))}
+                                                placeholder="Select date"
+                                                disabled={processing}
+                                                className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
                                             {errors.date && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.date}</p>

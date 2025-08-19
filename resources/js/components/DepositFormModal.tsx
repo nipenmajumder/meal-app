@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Loader2, Plus, X, Upload, PiggyBank, Users } from 'lucide-react';
 
 interface User {
@@ -41,6 +42,24 @@ export default function DepositFormModal({
         date: editingDeposit?.date || new Date().toISOString().split('T')[0],
         amount: editingDeposit?.amount?.toString() || '',
     });
+
+    // Helper function to convert date string to Date object
+    const getDateFromString = (dateString: string): Date | undefined => {
+        if (!dateString) return undefined;
+        // Create date in local timezone to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    // Helper function to convert Date to string
+    const getStringFromDate = (date: Date | undefined): string => {
+        if (!date) return '';
+        // Use local date to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     // Bulk deposit form
     const { 
@@ -201,12 +220,10 @@ export default function DepositFormModal({
                             {/* Date */}
                             <div className="space-y-2">
                                 <Label htmlFor="date">Date *</Label>
-                                <Input
-                                    id="date"
-                                    type="date"
-                                    value={data.date}
-                                    onChange={(e) => setData('date', e.target.value)}
-                                    max={new Date().toISOString().split('T')[0]}
+                                <DatePicker
+                                    date={getDateFromString(data.date)}
+                                    onSelect={(date) => setData('date', getStringFromDate(date))}
+                                    placeholder="Select date"
                                     disabled={processing}
                                     className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                 />
@@ -267,12 +284,10 @@ export default function DepositFormModal({
                             {/* Bulk Date */}
                             <div className="space-y-2">
                                 <Label htmlFor="bulk-date">Date for all deposits *</Label>
-                                <Input
-                                    id="bulk-date"
-                                    type="date"
-                                    value={bulkData.date}
-                                    onChange={(e) => setBulkData('date', e.target.value)}
-                                    max={new Date().toISOString().split('T')[0]}
+                                <DatePicker
+                                    date={getDateFromString(bulkData.date)}
+                                    onSelect={(date) => setBulkData('date', getStringFromDate(date))}
+                                    placeholder="Select date"
                                     disabled={bulkProcessing}
                                     className={bulkErrors.date ? 'border-red-500 focus:border-red-500' : ''}
                                 />

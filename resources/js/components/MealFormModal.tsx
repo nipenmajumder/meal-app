@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Loader2, Plus, X } from 'lucide-react';
 
 interface User {
@@ -33,6 +34,23 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
         date: editingMeal?.date || new Date().toISOString().split('T')[0],
         meal_count: editingMeal?.meal_count?.toString() || '',
     });
+
+    // Helper functions for date handling
+    const getDateFromString = (dateString: string): Date | undefined => {
+        if (!dateString) return undefined;
+        // Create date in local timezone to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const getStringFromDate = (date: Date | undefined): string => {
+        if (!date) return '';
+        // Use local date to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     const isEditing = !!editingMeal;
 
@@ -124,12 +142,10 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
                     {/* Date */}
                     <div className="space-y-2">
                         <Label htmlFor="date">Date *</Label>
-                        <Input
-                            id="date"
-                            type="date"
-                            value={data.date}
-                            onChange={(e) => setData('date', e.target.value)}
-                            max={new Date().toISOString().split('T')[0]}
+                        <DatePicker
+                            date={getDateFromString(data.date)}
+                            onSelect={(date) => setData('date', getStringFromDate(date))}
+                            placeholder="Select date"
                             disabled={processing}
                             className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                         />

@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "/home/kibo/sites/meal-app/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

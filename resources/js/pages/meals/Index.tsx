@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -76,12 +77,12 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
 
     const { data: formData, setData, post, processing, reset, errors } = useForm({
         user_id: '',
-        date: '',
+        date: new Date().toISOString().split('T')[0],
         meal_count: '',
     });
 
     const { data: bulkFormData, setData: setBulkData, post: postBulk, processing: bulkProcessing, reset: resetBulk, errors: bulkErrors } = useForm({
-        date: '',
+        date: new Date().toISOString().split('T')[0],
         meals: {} as Record<string, string>,
     });
 
@@ -90,6 +91,37 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         if (!value || value === 0) return '—';
         const num = Number(value);
         return num % 1 === 0 ? num.toString() : num.toFixed(1);
+    };
+
+    // Helper functions for date handling
+    const getDateFromString = (dateString: string): Date | undefined => {
+        if (!dateString) return undefined;
+        try {
+            // Create date in local timezone to avoid timezone issues
+            const [year, month, day] = dateString.split('-').map(Number);
+            if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
+            const date = new Date(year, month - 1, day);
+            // Validate that the date is valid
+            if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                return undefined;
+            }
+            return date;
+        } catch {
+            return undefined;
+        }
+    };
+
+    const getStringFromDate = (date: Date | undefined): string => {
+        if (!date || isNaN(date.getTime())) return '';
+        try {
+            // Use local date to avoid timezone issues
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        } catch {
+            return '';
+        }
     };
 
     const calculateRowTotal = (row: Meals): number => {
@@ -230,12 +262,12 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                     <form onSubmit={handleBulkSubmit} className="space-y-4">
                                         <div>
                                             <Label htmlFor="bulk_date">Date</Label>
-                                            <Input
-                                                id="bulk_date"
-                                                type="date"
-                                                value={bulkFormData.date}
-                                                onChange={(e) => setBulkData('date', e.target.value)}
-                                                max={new Date().toISOString().split('T')[0]}
+                                            <DatePicker
+                                                date={getDateFromString(bulkFormData.date)}
+                                                onSelect={(date) => setBulkData('date', getStringFromDate(date))}
+                                                placeholder="Select date"
+                                                disabled={bulkProcessing}
+                                                className={bulkErrors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
                                             {bulkErrors.date && (
                                                 <p className="text-red-500 text-sm mt-1">{bulkErrors.date}</p>
@@ -324,12 +356,12 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
 
                                         <div>
                                             <Label htmlFor="date">Date</Label>
-                                            <Input
-                                                id="date"
-                                                type="date"
-                                                value={formData.date}
-                                                onChange={(e) => setData('date', e.target.value)}
-                                                max={new Date().toISOString().split('T')[0]}
+                                            <DatePicker
+                                                date={getDateFromString(formData.date)}
+                                                onSelect={(date) => setData('date', getStringFromDate(date))}
+                                                placeholder="Select date"
+                                                disabled={processing}
+                                                className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
                                             {errors.date && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.date}</p>
