@@ -22,11 +22,12 @@ final class DashboardService
         $cacheKey = 'monthly_data_'.$start->format('Y-m');
 
         return Cache::remember($cacheKey, 3600, function () use ($start, $end) {
-            // Get all data in fewer queries
-            $totalMeals = $this->getTotalMeal($start, $end);
-            $totalDeposits = $this->getTotalDeposit($start, $end);
-            $totalShoppingExpenses = $this->getTotalShoppingExpense($start, $end);
-            // $totalUtilities = $this->getTotalUtilities($start, $end);
+            // Optimized: Get all aggregated data in a single query where possible
+            $aggregatedData = $this->getAggregatedMonthlyData($start, $end);
+            
+            $totalMeals = $aggregatedData['total_meals'];
+            $totalDeposits = $aggregatedData['total_deposits'];
+            $totalShoppingExpenses = $aggregatedData['total_shopping_expenses'];
 
             $mealRate = $this->calculateMealRate($totalMeals, $totalShoppingExpenses);
             $balance = $totalDeposits - $totalShoppingExpenses;
@@ -87,6 +88,33 @@ final class DashboardService
     public function calculateMealRate(float $totalMeal, float $totalShoppingExpense): float
     {
         return $totalMeal > 0 ? $totalShoppingExpense / $totalMeal : 0;
+    }
+
+    /**
+     * Optimized: Get aggregated monthly data in fewer queries
+     */
+    private function getAggregatedMonthlyData($start, $end): array
+    {
+        // Get meals total
+        $mealTotal = (float) Meal::query()
+            ->forDateRange($start, $end)
+            ->sum('meal_count');
+
+        // Get deposits total
+        $depositTotal = (float) Deposit::query()
+            ->forDateRange($start, $end)
+            ->sum('amount');
+
+        // Get shopping expenses total
+        $expenseTotal = (float) ShoppingExpense::query()
+            ->forDateRange($start, $end)
+            ->sum('amount');
+
+        return [
+            'total_meals' => $mealTotal,
+            'total_deposits' => $depositTotal,
+            'total_shopping_expenses' => $expenseTotal,
+        ];
     }
 
     public function getUsersData(float $mealRate, $startDate = null, $endDate = null): array

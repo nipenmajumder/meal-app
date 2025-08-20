@@ -110,7 +110,9 @@ final class ShoppingExpenseController extends Controller
             $end = now()->endOfMonth();
         }
 
-        $expenses = ShoppingExpense::with('user')
+        // Optimized: Select only needed columns and eager load user name
+        $expenses = ShoppingExpense::select('user_id', 'date', 'amount', 'description')
+            ->with('user:id,name')
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
             ->orderBy('user_id')
@@ -136,7 +138,9 @@ final class ShoppingExpenseController extends Controller
 
     private function transformExpenseData($start, $end)
     {
-        $expenses = ShoppingExpense::with('user')
+        // Optimized: Get expenses with only needed user data
+        $expenses = ShoppingExpense::select('user_id', 'date', 'amount', 'description')
+            ->with('user:id,name')
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
             ->get();
@@ -176,16 +180,19 @@ final class ShoppingExpenseController extends Controller
 
     private function getMonthlyStats($start, $end)
     {
-        $totalExpenses = (float) ShoppingExpense::whereBetween('date', [$start, $end])->sum('amount');
-        $expenseCount = ShoppingExpense::whereBetween('date', [$start, $end])->count();
-        $activeUsers = ShoppingExpense::whereBetween('date', [$start, $end])
-            ->distinct('user_id')
-            ->count('user_id');
+        // Optimized: Use selectRaw for better performance with aggregate functions
+        $stats = ShoppingExpense::selectRaw('
+            SUM(amount) as total_amount,
+            COUNT(*) as expense_count,
+            COUNT(DISTINCT user_id) as active_users
+        ')
+        ->whereBetween('date', [$start, $end])
+        ->first();
 
         return [
-            'totalAmount' => number_format($totalExpenses, 2),
-            'expenseCount' => $expenseCount,
-            'activeUsers' => $activeUsers,
+            'totalAmount' => number_format((float) ($stats->total_amount ?? 0), 2),
+            'expenseCount' => $stats->expense_count ?? 0,
+            'activeUsers' => $stats->active_users ?? 0,
         ];
     }
 }

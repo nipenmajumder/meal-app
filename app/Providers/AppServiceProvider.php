@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Pulse\Facades\Pulse;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureCommands();
         $this->configureDates();
         $this->configureModels();
+        $this->configurePulse();
         $this->configureUrl();
         $this->configureVite();
     }
@@ -84,5 +87,23 @@ final class AppServiceProvider extends ServiceProvider
     private function configureVite(): void
     {
         Vite::useAggressivePrefetching();
+    }
+
+    /**
+     * Configure Laravel Pulse authorization.
+     * This determines who can access the Pulse dashboard.
+     */
+    private function configurePulse(): void
+    {
+        Pulse::filter(function ($entry) {
+            // Filter out sensitive data if needed
+            return $entry;
+        });
+
+        Gate::define('viewPulse', function ($user = null) {
+            // Allow access to Pulse dashboard for authenticated users
+            // You can customize this logic based on your needs
+            return $user !== null;
+        });
     }
 }

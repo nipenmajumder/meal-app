@@ -34,7 +34,8 @@ final class MealController extends Controller
             return $this->getMonthlyStats($month);
         });
 
-        $users = User::all();
+        // Optimized: Select only needed columns for users
+        $users = User::active()->select('id', 'name')->orderBy('name')->get();
         $userNames = $users->pluck('name')->toArray();
 
         return Inertia::render('meals/Index', [
@@ -135,7 +136,9 @@ final class MealController extends Controller
         
         $month = $request->query('month', now()->format('Y-m'));
         $data = $this->transformMealData($month);
-        $users = User::all();
+        
+        // Optimized: Select only needed columns for users
+        $users = User::active()->select('id', 'name')->orderBy('name')->get();
 
         $filename = "meals_{$month}.csv";
 
@@ -174,11 +177,11 @@ final class MealController extends Controller
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
-        // Get all users
-        $users = User::all();
+        // Optimized: Get only necessary user data
+        $users = User::active()->select('id', 'name')->orderBy('name')->get();
 
-        // Get all meals for the month
-        $meals = Meal::with('user')
+        // Optimized: Get all meals for the month with only needed columns
+        $meals = Meal::select('user_id', 'date', 'meal_count')
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
             ->groupBy(function ($meal) {
@@ -211,23 +214,22 @@ final class MealController extends Controller
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
-        $totalMeals = Meal::whereBetween('date', [$startDate, $endDate])
-            ->sum('meal_count');
-
-        $mealCount = Meal::whereBetween('date', [$startDate, $endDate])
-            ->count();
-
-        $activeUsers = Meal::whereBetween('date', [$startDate, $endDate])
-            ->distinct('user_id')
-            ->count();
+        // Optimized: Use selectRaw for better performance with aggregate functions
+        $stats = Meal::selectRaw('
+            SUM(meal_count) as total_meals,
+            COUNT(*) as meal_count,
+            COUNT(DISTINCT user_id) as active_users
+        ')
+        ->whereBetween('date', [$startDate, $endDate])
+        ->first();
 
         // Ensure totalMeals is properly converted to a number
-        $totalMealsFloat = is_numeric($totalMeals) ? (float) $totalMeals : 0.0;
+        $totalMealsFloat = is_numeric($stats->total_meals) ? (float) $stats->total_meals : 0.0;
 
         return [
             'totalMeals' => number_format($totalMealsFloat, 1),
-            'mealCount' => $mealCount,
-            'activeUsers' => $activeUsers,
+            'mealCount' => $stats->meal_count ?? 0,
+            'activeUsers' => $stats->active_users ?? 0,
         ];
     }
 }

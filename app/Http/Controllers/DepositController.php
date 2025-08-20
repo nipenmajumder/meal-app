@@ -112,7 +112,9 @@ final class DepositController extends Controller
             $end = now()->endOfMonth();
         }
 
-        $deposits = Deposit::with('user')
+        // Optimized: Select only needed columns and eager load user name
+        $deposits = Deposit::select('user_id', 'date', 'amount')
+            ->with('user:id,name')
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
             ->orderBy('user_id')
@@ -137,16 +139,19 @@ final class DepositController extends Controller
 
     private function getMonthlyStats($start, $end)
     {
-        $totalDeposits = (float) Deposit::whereBetween('date', [$start, $end])->sum('amount');
-        $depositCount = Deposit::whereBetween('date', [$start, $end])->count();
-        $activeUsers = Deposit::whereBetween('date', [$start, $end])
-            ->distinct('user_id')
-            ->count('user_id');
+        // Optimized: Use selectRaw for better performance with aggregate functions
+        $stats = Deposit::selectRaw('
+            SUM(amount) as total_deposits,
+            COUNT(*) as deposit_count,
+            COUNT(DISTINCT user_id) as active_users
+        ')
+        ->whereBetween('date', [$start, $end])
+        ->first();
 
         return [
-            'totalAmount' => number_format($totalDeposits, 2),
-            'depositCount' => $depositCount,
-            'activeUsers' => $activeUsers,
+            'totalAmount' => number_format((float) ($stats->total_deposits ?? 0), 2),
+            'depositCount' => $stats->deposit_count ?? 0,
+            'activeUsers' => $stats->active_users ?? 0,
         ];
     }
 }

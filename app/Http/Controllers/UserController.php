@@ -29,10 +29,14 @@ final class UserController extends Controller
      */
     public function index(Request $request): Response
     {
-        $users = User::with('roles')
+        // Optimized: Select only needed columns and improve role filtering
+        $users = User::select('id', 'name', 'email', 'status', 'created_at', 'updated_at')
+            ->with('roles:id,name')
             ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             })
             ->when($request->role, function ($query, $role) {
                 $query->whereHas('roles', function ($roleQuery) use ($role) {
@@ -46,7 +50,8 @@ final class UserController extends Controller
             ->paginate($request->per_page ?? 10)
             ->withQueryString();
 
-        $roles = Role::all();
+        // Optimized: Select only needed columns
+        $roles = Role::select('id', 'name')->orderBy('name')->get();
         $currentUserRoles = request()->user()->roles->pluck('name')->toArray();
 
         return Inertia::render('users/Index', [

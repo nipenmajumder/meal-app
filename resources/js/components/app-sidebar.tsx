@@ -1,10 +1,9 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, TrendingUp, ShoppingCart, UtensilsCrossed, Users, Shield, UserCog } from 'lucide-react';
+import { LayoutGrid, TrendingUp, ShoppingCart, UtensilsCrossed, Users, Shield, UserCog, Activity } from 'lucide-react';
 import AppLogo from './app-logo';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useMemo } from 'react';
@@ -16,6 +15,12 @@ const navigationConfig: Array<NavItem & { permission?: string; roles?: string[] 
         href: '/dashboard',
         icon: LayoutGrid,
         permission: 'view dashboard',
+    },
+    {
+        title: 'Pulse',
+        href: '/pulse',
+        icon: Activity,
+        permission: 'view dashboard', // Reusing dashboard permission for simplicity, or you can create a specific pulse permission
     },
     {
         title: 'Deposits',
@@ -77,7 +82,11 @@ export function AppSidebar() {
             }
             
             return false;
-        }).map(({ permission, roles, ...navItem }) => navItem); // Remove permission/roles from the final nav item
+        }).map((item) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { permission, roles, ...navItem } = item;
+            return navItem;
+        });
     }, [hasPermission, hasRole]);
 
     return (

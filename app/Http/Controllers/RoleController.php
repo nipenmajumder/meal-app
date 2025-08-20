@@ -37,13 +37,22 @@ final class RoleController extends Controller
             ->paginate($request->per_page ?? 10)
             ->withQueryString();
 
-        $permissions = Permission::all();
+        $permissions = Permission::select('id', 'name')->orderBy('name')->get();
 
-        // Create role permissions mapping for all roles (not just paginated ones)
-        $allRoles = Role::with('permissions')->get();
+        // Optimized: Create role permissions mapping from already loaded permissions
         $rolePermissions = [];
-        foreach ($allRoles as $role) {
+        foreach ($roles->items() as $role) {
             $rolePermissions[$role->id] = $role->permissions->pluck('id')->toArray();
+        }
+
+        // Only load additional roles if we need complete mapping for non-paginated roles
+        if ($roles->hasPages() && $request->filled('search')) {
+            $allRoles = Role::with('permissions:id')->get(['id']);
+            foreach ($allRoles as $role) {
+                if (!isset($rolePermissions[$role->id])) {
+                    $rolePermissions[$role->id] = $role->permissions->pluck('id')->toArray();
+                }
+            }
         }
 
         return Inertia::render('roles/Index', [
@@ -72,7 +81,8 @@ final class RoleController extends Controller
         ]);
 
         if ($request->permissions) {
-            $permissions = Permission::whereIn('id', $request->permissions)->get();
+            // Optimized: Use whereIn with select to reduce data transfer
+            $permissions = Permission::whereIn('id', $request->permissions)->select('id')->get();
             $role->syncPermissions($permissions);
         }
 
@@ -90,7 +100,8 @@ final class RoleController extends Controller
         ]);
 
         if ($request->has('permissions')) {
-            $permissions = Permission::whereIn('id', $request->permissions)->get();
+            // Optimized: Use whereIn with select to reduce data transfer
+            $permissions = Permission::whereIn('id', $request->permissions)->select('id')->get();
             $role->syncPermissions($permissions);
         }
 
@@ -126,8 +137,9 @@ final class RoleController extends Controller
      */
     public function permissions(): Response
     {
-        $roles = Role::with('permissions')->get();
-        $permissions = Permission::all();
+        // Optimized: Load roles with only necessary permission data
+        $roles = Role::with('permissions:id,name')->select('id', 'name')->get();
+        $permissions = Permission::select('id', 'name')->orderBy('name')->get();
 
         // Create role permissions mapping
         $rolePermissions = [];
@@ -165,7 +177,8 @@ final class RoleController extends Controller
                 continue;
             }
 
-            $permissions = Permission::whereIn('id', $permissionIds)->get();
+            // Optimized: Use whereIn with select to reduce data transfer
+            $permissions = Permission::whereIn('id', $permissionIds)->select('id')->get();
             $role->syncPermissions($permissions);
         }
 
@@ -178,8 +191,8 @@ final class RoleController extends Controller
      */
     public function rolePermissions(Role $role)
     {
-        $role->load('permissions');
-        $allPermissions = Permission::all();
+        $role->load('permissions:id,name');
+        $allPermissions = Permission::select('id', 'name')->orderBy('name')->get();
 
         return response()->json([
             'role' => $role,
@@ -203,7 +216,8 @@ final class RoleController extends Controller
             return redirect()->back()->with('error', 'You cannot modify super-admin permissions.');
         }
 
-        $permissions = Permission::whereIn('id', $request->permissions ?? [])->get();
+        // Optimized: Use whereIn with select to reduce data transfer
+        $permissions = Permission::whereIn('id', $request->permissions ?? [])->select('id')->get();
         $role->syncPermissions($permissions);
 
         return redirect()->back()
