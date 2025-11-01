@@ -1,7 +1,6 @@
-import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, X, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, X } from 'lucide-react';
 
 interface ErrorBoundaryProps {
     error?: string | Record<string, string[]>;
@@ -12,13 +11,13 @@ interface ErrorBoundaryProps {
     className?: string;
 }
 
-export default function ErrorBoundary({ 
-    error, 
+export default function ErrorBoundary({
+    error,
     title = 'Something went wrong',
     showRetry = false,
     onRetry,
     onDismiss,
-    className = ''
+    className = '',
 }: ErrorBoundaryProps) {
     if (!error) return null;
 
@@ -32,14 +31,9 @@ export default function ErrorBoundary({
                 <div className="space-y-2">
                     {Object.entries(error).map(([field, messages]) => (
                         <div key={field}>
-                            <p className="font-medium text-sm capitalize">{field.replace('_', ' ')}:</p>
-                            <ul className="list-disc list-inside text-sm ml-2">
-                                {Array.isArray(messages) 
-                                    ? messages.map((message, index) => (
-                                        <li key={index}>{message}</li>
-                                    ))
-                                    : <li>{messages}</li>
-                                }
+                            <p className="text-sm font-medium capitalize">{field.replace('_', ' ')}:</p>
+                            <ul className="ml-2 list-inside list-disc text-sm">
+                                {Array.isArray(messages) ? messages.map((message, index) => <li key={index}>{message}</li>) : <li>{messages}</li>}
                             </ul>
                         </div>
                     ))}
@@ -57,12 +51,7 @@ export default function ErrorBoundary({
                 <AlertTitle className="flex items-center justify-between">
                     {title}
                     {onDismiss && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onDismiss}
-                            className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900"
-                        >
+                        <Button variant="ghost" size="sm" onClick={onDismiss} className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900">
                             <X className="h-3 w-3" />
                         </Button>
                     )}
@@ -76,7 +65,7 @@ export default function ErrorBoundary({
                             onClick={onRetry}
                             className="mt-3 border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-950"
                         >
-                            <RefreshCw className="h-3 w-3 mr-1" />
+                            <RefreshCw className="mr-1 h-3 w-3" />
                             Try Again
                         </Button>
                     )}

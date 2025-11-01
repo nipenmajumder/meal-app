@@ -1,10 +1,5 @@
-import React, { useState } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { ConsistentTable, ConsistentTableCell, ConsistentTableHeader, ConsistentTableRow } from '@/components/consistent-table';
+import { RolePermissionsModal } from '@/components/RolePermissionsModal';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,17 +10,16 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { ConsistentTable, ConsistentTableHeader, ConsistentTableRow, ConsistentTableCell } from '@/components/consistent-table';
-import { RolePermissionsModal } from '@/components/RolePermissionsModal';
-import { Role, Permission, PageProps } from '@/types';
-import { Plus, Edit, Trash2, Shield, Users, Settings, Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { PageProps, Permission, Role } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Edit, Lock, Plus, Settings, Shield, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface RolesPageProps extends PageProps {
     roles: {
@@ -74,9 +68,7 @@ export default function RolesIndex() {
         setProcessing(true);
         setErrors({});
 
-        const endpoint = editingRole 
-            ? route('roles.update', editingRole.id)
-            : route('roles.store');
+        const endpoint = editingRole ? route('roles.update', editingRole.id) : route('roles.store');
 
         const method = editingRole ? 'put' : 'post';
 
@@ -87,7 +79,7 @@ export default function RolesIndex() {
                 setFormData({ name: '', guard_name: 'web' });
             },
             onError: (errors) => setErrors(errors),
-            onFinish: () => setProcessing(false)
+            onFinish: () => setProcessing(false),
         });
     };
 
@@ -122,33 +114,26 @@ export default function RolesIndex() {
     return (
         <AppLayout>
             <Head title="Roles Management" />
-            
-            <div className="p-6 lg:p-8 space-y-6">
+
+            <div className="space-y-6 p-6 lg:p-8">
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Roles Management
-                        </h1>
-                        <p className="text-muted-foreground mt-2">
-                            Create and manage user roles and their permissions
-                        </p>
+                        <h1 className="text-foreground text-3xl font-bold">Roles Management</h1>
+                        <p className="text-muted-foreground mt-2">Create and manage user roles and their permissions</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {can.manage_permissions && (
-                            <Button 
-                                variant="outline"
-                                asChild
-                            >
+                            <Button variant="outline" asChild>
                                 <Link href={route('roles.permissions')}>
-                                    <Settings className="h-4 w-4 mr-2" />
+                                    <Settings className="mr-2 h-4 w-4" />
                                     Manage Permissions
                                 </Link>
                             </Button>
                         )}
                         {can.create_roles && (
                             <Button onClick={openCreateModal}>
-                                <Plus className="h-4 w-4 mr-2" />
+                                <Plus className="mr-2 h-4 w-4" />
                                 Add New Role
                             </Button>
                         )}
@@ -156,24 +141,32 @@ export default function RolesIndex() {
                 </div>
 
                 {/* Roles Table */}
-                <div className="bg-card border rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b">
+                <div className="bg-card overflow-hidden rounded-lg border">
+                    <div className="border-b px-6 py-4">
                         <div className="flex items-center justify-between">
                             <h3 className="font-semibold">System Roles</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="text-muted-foreground flex items-center gap-2 text-sm">
                                 <span>{roles.total} Total Roles</span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                         <ConsistentTable>
                             <ConsistentTableHeader>
                                 <ConsistentTableRow>
-                                    <ConsistentTableCell isHeader className="text-left font-medium">Role</ConsistentTableCell>
-                                    <ConsistentTableCell isHeader className="text-left font-medium">Guard</ConsistentTableCell>
-                                    <ConsistentTableCell isHeader className="text-left font-medium">Created</ConsistentTableCell>
-                                    <ConsistentTableCell isHeader className="text-center font-medium">Actions</ConsistentTableCell>
+                                    <ConsistentTableCell isHeader className="text-left font-medium">
+                                        Role
+                                    </ConsistentTableCell>
+                                    <ConsistentTableCell isHeader className="text-left font-medium">
+                                        Guard
+                                    </ConsistentTableCell>
+                                    <ConsistentTableCell isHeader className="text-left font-medium">
+                                        Created
+                                    </ConsistentTableCell>
+                                    <ConsistentTableCell isHeader className="text-center font-medium">
+                                        Actions
+                                    </ConsistentTableCell>
                                 </ConsistentTableRow>
                             </ConsistentTableHeader>
                             <tbody>
@@ -182,12 +175,12 @@ export default function RolesIndex() {
                                         <ConsistentTableRow key={role.id} isEvenRow={index % 2 === 0} className="hover:bg-muted/50">
                                             <ConsistentTableCell className="py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                        <Shield className="h-4 w-4 text-primary" />
+                                                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
+                                                        <Shield className="text-primary h-4 w-4" />
                                                     </div>
                                                     <div>
                                                         <div className="font-medium">{role.name}</div>
-                                                        <div className="text-xs text-muted-foreground">ID: {role.id}</div>
+                                                        <div className="text-muted-foreground text-xs">ID: {role.id}</div>
                                                     </div>
                                                 </div>
                                             </ConsistentTableCell>
@@ -197,38 +190,31 @@ export default function RolesIndex() {
                                                 </Badge>
                                             </ConsistentTableCell>
                                             <ConsistentTableCell className="py-4">
-                                                <div className="text-sm">
-                                                    {new Date(role.created_at).toLocaleDateString()}
-                                                </div>
+                                                <div className="text-sm">{new Date(role.created_at).toLocaleDateString()}</div>
                                             </ConsistentTableCell>
                                             <ConsistentTableCell className="py-4">
                                                 <div className="flex justify-center gap-1">
                                                     {can.manage_permissions && (
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            size="sm" 
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
                                                             onClick={() => setPermissionsRole(role)}
-                                                            className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                            className="h-8 px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
                                                         >
                                                             <Lock className="h-4 w-4" />
                                                         </Button>
                                                     )}
                                                     {can.edit_roles && (
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            size="sm" 
-                                                            onClick={() => handleEdit(role)}
-                                                            className="h-8 px-2"
-                                                        >
+                                                        <Button variant="ghost" size="sm" onClick={() => handleEdit(role)} className="h-8 px-2">
                                                             <Edit className="h-4 w-4" />
                                                         </Button>
                                                     )}
                                                     {can.delete_roles && role.name !== 'super-admin' && (
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            size="sm" 
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
                                                             onClick={() => setDeletingRole(role)}
-                                                            className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                            className="h-8 px-2 text-red-600 hover:bg-red-50 hover:text-red-700"
                                                         >
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
@@ -239,20 +225,14 @@ export default function RolesIndex() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-12">
+                                        <td colSpan={4} className="py-12 text-center">
                                             <div className="flex flex-col items-center gap-2">
-                                                <Shield className="h-8 w-8 text-muted-foreground" />
+                                                <Shield className="text-muted-foreground h-8 w-8" />
                                                 <h3 className="font-medium">No roles found</h3>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Create your first role to get started.
-                                                </p>
+                                                <p className="text-muted-foreground text-sm">Create your first role to get started.</p>
                                                 {can.create_roles && (
-                                                    <Button 
-                                                        onClick={openCreateModal}
-                                                        size="sm"
-                                                        className="mt-2"
-                                                    >
-                                                        <Plus className="h-4 w-4 mr-2" />
+                                                    <Button onClick={openCreateModal} size="sm" className="mt-2">
+                                                        <Plus className="mr-2 h-4 w-4" />
                                                         Create Role
                                                     </Button>
                                                 )}
@@ -270,12 +250,8 @@ export default function RolesIndex() {
             <Dialog open={isCreateModalOpen} onOpenChange={closeModal}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>
-                            {editingRole ? 'Edit Role' : 'Create New Role'}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {editingRole ? 'Update the role details.' : 'Add a new role to the system.'}
-                        </DialogDescription>
+                        <DialogTitle>{editingRole ? 'Edit Role' : 'Create New Role'}</DialogTitle>
+                        <DialogDescription>{editingRole ? 'Update the role details.' : 'Add a new role to the system.'}</DialogDescription>
                     </DialogHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -285,14 +261,12 @@ export default function RolesIndex() {
                                 id="name"
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                                 className={errors.name ? 'border-red-500' : ''}
                                 placeholder="e.g. Manager, Editor, Viewer"
                                 required
                             />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name}</p>
-                            )}
+                            {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -301,26 +275,20 @@ export default function RolesIndex() {
                                 id="guard_name"
                                 type="text"
                                 value={formData.guard_name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, guard_name: e.target.value }))}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, guard_name: e.target.value }))}
                                 className={errors.guard_name ? 'border-red-500' : ''}
                                 placeholder="web"
                                 required
                             />
-                            {errors.guard_name && (
-                                <p className="text-sm text-red-600">{errors.guard_name}</p>
-                            )}
+                            {errors.guard_name && <p className="text-sm text-red-600">{errors.guard_name}</p>}
                         </div>
 
                         <div className="flex justify-end gap-2 pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={closeModal}
-                            >
+                            <Button type="button" variant="outline" onClick={closeModal}>
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={processing}>
-                                {processing ? 'Saving...' : (editingRole ? 'Update' : 'Create')}
+                                {processing ? 'Saving...' : editingRole ? 'Update' : 'Create'}
                             </Button>
                         </div>
                     </form>
@@ -333,15 +301,13 @@ export default function RolesIndex() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Role</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete the role "{deletingRole?.name}"? This action cannot be undone and will affect all users with this role.
+                            Are you sure you want to delete the role "{deletingRole?.name}"? This action cannot be undone and will affect all users
+                            with this role.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>

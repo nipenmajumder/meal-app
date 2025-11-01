@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Loader2, Plus, X, Receipt } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
+import { Loader2, Plus, Receipt, X } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface User {
     id: number;
@@ -28,14 +28,9 @@ interface ShoppingExpenseFormModalProps {
     };
 }
 
-export default function ShoppingExpenseFormModal({ 
-    isOpen, 
-    onClose, 
-    users, 
-    editingExpense 
-}: ShoppingExpenseFormModalProps) {
+export default function ShoppingExpenseFormModal({ isOpen, onClose, users, editingExpense }: ShoppingExpenseFormModalProps) {
     const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-    
+
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         user_id: editingExpense?.user_id?.toString() || '',
         date: editingExpense?.date || new Date().toISOString().split('T')[0],
@@ -126,11 +121,7 @@ export default function ShoppingExpenseFormModal({
                     {/* User Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="user">Shopper *</Label>
-                        <Select 
-                            value={data.user_id} 
-                            onValueChange={(value) => setData('user_id', value)}
-                            disabled={processing}
-                        >
+                        <Select value={data.user_id} onValueChange={(value) => setData('user_id', value)} disabled={processing}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Who did the shopping?" />
                             </SelectTrigger>
@@ -142,9 +133,7 @@ export default function ShoppingExpenseFormModal({
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.user_id && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>
-                        )}
+                        {errors.user_id && <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>}
                     </div>
 
                     {/* Date */}
@@ -157,18 +146,14 @@ export default function ShoppingExpenseFormModal({
                             disabled={processing}
                             className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                         />
-                        {errors.date && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>
-                        )}
+                        {errors.date && <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>}
                     </div>
 
                     {/* Amount */}
                     <div className="space-y-2">
                         <Label htmlFor="amount">Amount (৳) *</Label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                                ৳
-                            </span>
+                            <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 transform">৳</span>
                             <Input
                                 id="amount"
                                 type="number"
@@ -181,9 +166,7 @@ export default function ShoppingExpenseFormModal({
                                 className={`pl-8 ${errors.amount ? 'border-red-500 focus:border-red-500' : ''}`}
                             />
                         </div>
-                        {errors.amount && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.amount}</p>
-                        )}
+                        {errors.amount && <p className="text-sm text-red-600 dark:text-red-400">{errors.amount}</p>}
                     </div>
 
                     {/* Description */}
@@ -198,31 +181,19 @@ export default function ShoppingExpenseFormModal({
                             rows={3}
                             className={errors.description ? 'border-red-500 focus:border-red-500' : ''}
                         />
-                        {errors.description && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                            Optional: Add details about what was purchased
-                        </p>
+                        {errors.description && <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
+                        <p className="text-muted-foreground text-xs">Optional: Add details about what was purchased</p>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-2 pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleClose}
-                            disabled={processing}
-                        >
-                            <X className="h-4 w-4 mr-2" />
+                        <Button type="button" variant="outline" onClick={handleClose} disabled={processing}>
+                            <X className="mr-2 h-4 w-4" />
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={processing || !data.user_id || !data.date || !data.amount}
-                        >
-                            {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            <Plus className="h-4 w-4 mr-2" />
+                        <Button type="submit" disabled={processing || !data.user_id || !data.date || !data.amount}>
+                            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <Plus className="mr-2 h-4 w-4" />
                             {isEditing ? 'Update Expense' : 'Add Expense'}
                         </Button>
                     </div>

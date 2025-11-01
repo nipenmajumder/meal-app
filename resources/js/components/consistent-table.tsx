@@ -1,12 +1,5 @@
+import { Table, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import React from 'react';
-import {
-    Table,
-    TableHead,
-    TableHeader,
-    TableRow,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
 
 interface ConsistentTableProps {
     children: React.ReactNode;
@@ -34,41 +27,33 @@ interface ConsistentTableCellProps {
 
 export function ConsistentTable({ children, className = '' }: ConsistentTableProps) {
     return (
-        <div className="rounded-lg border border-border bg-card shadow-sm">
-            <Table className={`border-collapse ${className}`}>
-                {children}
-            </Table>
+        <div className="border-border bg-card rounded-lg border shadow-sm">
+            <Table className={`border-collapse ${className}`}>{children}</Table>
         </div>
     );
 }
 
 export function ScrollableTableContainer({ children, title, subtitle }: { children: React.ReactNode; title?: string; subtitle?: string }) {
     return (
-        <div className="border-border relative  flex-1 rounded-xl border bg-card shadow-sm">
+        <div className="border-border bg-card relative flex-1 rounded-xl border shadow-sm">
             {(title || subtitle) && (
-                <div className="p-4 border-b bg-muted/50">
-                    {title && <h2 className="text-xl font-semibold text-center text-foreground">{title}</h2>}
-                    {subtitle && <p className="text-sm text-center text-muted-foreground mt-1">{subtitle}</p>}
+                <div className="bg-muted/50 border-b p-4">
+                    {title && <h2 className="text-foreground text-center text-xl font-semibold">{title}</h2>}
+                    {subtitle && <p className="text-muted-foreground mt-1 text-center text-sm">{subtitle}</p>}
                 </div>
             )}
-            <Table className="border-collapse">
-                {children}
-            </Table>
+            <Table className="border-collapse">{children}</Table>
         </div>
     );
 }
 
 export function ConsistentTableHeader({ children, className = '' }: ConsistentTableHeaderProps) {
-    return (
-        <TableHeader className={`sticky top-0 z-20 ${className}`}>
-            {children}
-        </TableHeader>
-    );
+    return <TableHeader className={`sticky top-0 z-20 ${className}`}>{children}</TableHeader>;
 }
 
 export function ConsistentTableRow({ children, className = '', isEvenRow = false, isSummaryRow = false }: ConsistentTableRowProps) {
     let rowClasses = 'transition-colors border-b border-border';
-    
+
     if (isSummaryRow) {
         rowClasses += ' bg-muted/50 border-t-2 border-primary/20 font-bold';
     } else if (isEvenRow) {
@@ -76,17 +61,13 @@ export function ConsistentTableRow({ children, className = '', isEvenRow = false
     } else {
         rowClasses += ' bg-card hover:bg-muted/30';
     }
-    
-    return (
-        <TableRow className={`${rowClasses} ${className}`}>
-            {children}
-        </TableRow>
-    );
+
+    return <TableRow className={`${rowClasses} ${className}`}>{children}</TableRow>;
 }
 
 export function ConsistentTableCell({ children, className = '', isSticky = false, isHeader = false }: ConsistentTableCellProps) {
     let cellClasses = 'text-center border-r border-border/50';
-    
+
     if (isHeader) {
         cellClasses += ' bg-muted/80 font-semibold text-foreground min-w-[120px]';
         if (isSticky) {
@@ -97,24 +78,24 @@ export function ConsistentTableCell({ children, className = '', isSticky = false
     } else {
         cellClasses += ' text-foreground';
     }
-    
-    return (
-        <TableCell className={`${cellClasses} ${className}`}>
-            {children}
-        </TableCell>
-    );
+
+    return <TableCell className={`${cellClasses} ${className}`}>{children}</TableCell>;
 }
 
-export function ConsistentTableHead({ children, className = '', isSticky = false }: { children: React.ReactNode; className?: string; isSticky?: boolean }) {
+export function ConsistentTableHead({
+    children,
+    className = '',
+    isSticky = false,
+}: {
+    children: React.ReactNode;
+    className?: string;
+    isSticky?: boolean;
+}) {
     let headClasses = 'text-center font-semibold text-foreground min-w-[120px] border-r border-border/50 bg-muted/80';
-    
+
     if (isSticky) {
         headClasses += 'sticky left-0 z-30 min-w-[160px] border-r-2 border-border';
     }
-    
-    return (
-        <TableHead className={`${headClasses} ${className}`}>
-            {children}
-        </TableHead>
-    );
+
+    return <TableHead className={`${headClasses} ${className}`}>{children}</TableHead>;
 }

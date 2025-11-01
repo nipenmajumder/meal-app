@@ -1,19 +1,5 @@
-import React, { useState } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Can } from '@/components/Can';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { ConsistentTable, ConsistentTableCell, ConsistentTableHeader, ConsistentTableRow } from '@/components/consistent-table';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,10 +10,18 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ConsistentTable, ConsistentTableHeader, ConsistentTableRow, ConsistentTableCell } from '@/components/consistent-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { UserFormModal } from '@/components/UserFormModal';
-import { User, Role, PageProps } from '@/types';
-import { Plus, Search, Filter, Edit, Trash2, Power, PowerOff, Users } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
+import { PageProps, Role, User } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Edit, Filter, Plus, Power, PowerOff, Search, Trash2, Users } from 'lucide-react';
+import { useState } from 'react';
 
 interface UsersPageProps extends PageProps {
     users: {
@@ -56,25 +50,33 @@ export default function UsersIndex() {
 
     const handleSearch = () => {
         setIsLoading(true);
-        router.get(route('users.index'), {
-            search: searchTerm,
-            role: selectedRole === 'all' ? '' : selectedRole,
-            status: selectedStatus === 'all' ? '' : selectedStatus,
-        }, {
-            preserveState: true,
-            replace: true,
-            onFinish: () => setIsLoading(false),
-        });
+        router.get(
+            route('users.index'),
+            {
+                search: searchTerm,
+                role: selectedRole === 'all' ? '' : selectedRole,
+                status: selectedStatus === 'all' ? '' : selectedStatus,
+            },
+            {
+                preserveState: true,
+                replace: true,
+                onFinish: () => setIsLoading(false),
+            },
+        );
     };
 
     const handleReset = () => {
         setSearchTerm('');
         setSelectedRole('all');
         setSelectedStatus('all');
-        router.get(route('users.index'), {}, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            route('users.index'),
+            {},
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDeleteUser = () => {
@@ -92,7 +94,7 @@ export default function UsersIndex() {
                 <ConsistentTableRow key={index} isEvenRow={index % 2 === 0} className="animate-pulse">
                     <ConsistentTableCell className="py-6">
                         <div className="flex items-center gap-4">
-                            <Skeleton className="w-12 h-12 rounded-2xl" />
+                            <Skeleton className="h-12 w-12 rounded-2xl" />
                             <div className="space-y-3">
                                 <Skeleton className="h-4 w-36" />
                                 <Skeleton className="h-3 w-20 rounded-md" />
@@ -130,12 +132,17 @@ export default function UsersIndex() {
                 </ConsistentTableRow>
             ))}
         </>
-    );    const handleToggleStatus = (user: User) => {
-        router.patch(route('users.toggle-status', user.id), {}, {
-            onSuccess: () => {
-                // Status toggled successfully
+    );
+    const handleToggleStatus = (user: User) => {
+        router.patch(
+            route('users.toggle-status', user.id),
+            {},
+            {
+                onSuccess: () => {
+                    // Status toggled successfully
+                },
             },
-        });
+        );
     };
 
     const getStatusBadge = (status: number) => {
@@ -153,23 +160,16 @@ export default function UsersIndex() {
     return (
         <AppLayout>
             <Head title="Users Management" />
-            
-            <div className="p-6 lg:p-8 space-y-8">
+
+            <div className="space-y-8 p-6 lg:p-8">
                 {/* Simple Page Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">
-                            Users Management
-                        </h1>
-                        <p className="text-muted-foreground mt-2">
-                            Manage system users, assign roles, and control permissions
-                        </p>
+                        <h1 className="text-foreground text-3xl font-bold">Users Management</h1>
+                        <p className="text-muted-foreground mt-2">Manage system users, assign roles, and control permissions</p>
                     </div>
                     <Can permission="create users">
-                        <Button 
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2"
-                        >
+                        <Button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2">
                             <Plus className="h-4 w-4" />
                             Add New User
                         </Button>
@@ -177,19 +177,17 @@ export default function UsersIndex() {
                 </div>
 
                 {/* Simple Filters Section */}
-                <div className="bg-card border rounded-lg p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Filter className="h-5 w-5 text-muted-foreground" />
+                <div className="bg-card rounded-lg border p-6">
+                    <div className="mb-6 flex items-center gap-2">
+                        <Filter className="text-muted-foreground h-5 w-5" />
                         <h3 className="font-semibold">Filters</h3>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+                    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                                Search Users
-                            </Label>
+                            <Label className="mb-2 block text-sm font-medium">Search Users</Label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                                 <Input
                                     placeholder="Search by name, email..."
                                     value={searchTerm}
@@ -201,9 +199,7 @@ export default function UsersIndex() {
                         </div>
 
                         <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                                Role
-                            </Label>
+                            <Label className="mb-2 block text-sm font-medium">Role</Label>
                             <Select value={selectedRole} onValueChange={setSelectedRole}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="All roles" />
@@ -220,9 +216,7 @@ export default function UsersIndex() {
                         </div>
 
                         <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                                Status
-                            </Label>
+                            <Label className="mb-2 block text-sm font-medium">Status</Label>
                             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="All statuses" />
@@ -237,18 +231,10 @@ export default function UsersIndex() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button 
-                            onClick={handleSearch} 
-                            disabled={isLoading}
-                            size="sm"
-                        >
+                        <Button onClick={handleSearch} disabled={isLoading} size="sm">
                             {isLoading ? 'Applying...' : 'Apply Filters'}
                         </Button>
-                        <Button 
-                            variant="outline" 
-                            onClick={handleReset}
-                            size="sm"
-                        >
+                        <Button variant="outline" onClick={handleReset} size="sm">
                             Reset
                         </Button>
                     </div>
@@ -256,12 +242,24 @@ export default function UsersIndex() {
                 <ConsistentTable>
                     <ConsistentTableHeader>
                         <ConsistentTableRow>
-                            <ConsistentTableCell isHeader className="text-left font-medium">User</ConsistentTableCell>
-                            <ConsistentTableCell isHeader className="text-left font-medium">Email</ConsistentTableCell>
-                            <ConsistentTableCell isHeader className="text-left font-medium">Roles</ConsistentTableCell>
-                            <ConsistentTableCell isHeader className="text-center font-medium">Status</ConsistentTableCell>
-                            <ConsistentTableCell isHeader className="text-left font-medium">Joined</ConsistentTableCell>
-                            <ConsistentTableCell isHeader className="text-center font-medium">Actions</ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-left font-medium">
+                                User
+                            </ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-left font-medium">
+                                Email
+                            </ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-left font-medium">
+                                Roles
+                            </ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-center font-medium">
+                                Status
+                            </ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-left font-medium">
+                                Joined
+                            </ConsistentTableCell>
+                            <ConsistentTableCell isHeader className="text-center font-medium">
+                                Actions
+                            </ConsistentTableCell>
                         </ConsistentTableRow>
                     </ConsistentTableHeader>
                     <tbody>
@@ -271,7 +269,7 @@ export default function UsersIndex() {
                             users.data.map((user, index) => (
                                 <ConsistentTableRow key={user.id} isEvenRow={index % 2 === 0} className="hover:bg-muted/50">
                                     <ConsistentTableCell className="py-4">
-                                        <div className="flex items-center gap-3">                           
+                                        <div className="flex items-center gap-3">
                                             <div className="font-medium">{user.name}</div>
                                         </div>
                                     </ConsistentTableCell>
@@ -284,9 +282,7 @@ export default function UsersIndex() {
                                                 <Badge key={role.id} variant="secondary" className="text-xs">
                                                     {role.name}
                                                 </Badge>
-                                            )) || (
-                                                <span className="text-xs text-muted-foreground">No roles</span>
-                                            )}
+                                            )) || <span className="text-muted-foreground text-xs">No roles</span>}
                                         </div>
                                     </ConsistentTableCell>
                                     <ConsistentTableCell className="py-4">
@@ -303,45 +299,29 @@ export default function UsersIndex() {
                                         </div>
                                     </ConsistentTableCell>
                                     <ConsistentTableCell className="py-4">
-                                        <div className="text-sm">
-                                            {new Date(user.created_at).toLocaleDateString()}
-                                        </div>
+                                        <div className="text-sm">{new Date(user.created_at).toLocaleDateString()}</div>
                                     </ConsistentTableCell>
                                     <ConsistentTableCell className="py-4">
                                         <div className="flex justify-center gap-1">
                                             <Can permission="edit users">
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
-                                                    onClick={() => setEditingUser(user)}
-                                                    className="h-8 px-2"
-                                                >
+                                                <Button variant="ghost" size="sm" onClick={() => setEditingUser(user)} className="h-8 px-2">
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                             </Can>
                                             <Can permission="manage user status">
                                                 {user.id !== auth.user.id && (
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="sm" 
-                                                        onClick={() => handleToggleStatus(user)}
-                                                        className="h-8 px-2"
-                                                    >
-                                                        {user.status === 1 ? (
-                                                            <PowerOff className="h-4 w-4" />
-                                                        ) : (
-                                                            <Power className="h-4 w-4" />
-                                                        )}
+                                                    <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(user)} className="h-8 px-2">
+                                                        {user.status === 1 ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
                                                     </Button>
                                                 )}
                                             </Can>
                                             <Can permission="delete users">
                                                 {user.id !== auth.user.id && (
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="sm" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
                                                         onClick={() => setDeletingUser(user)}
-                                                        className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        className="h-8 px-2 text-red-600 hover:bg-red-50 hover:text-red-700"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -353,20 +333,14 @@ export default function UsersIndex() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="text-center py-12">
+                                <td colSpan={6} className="py-12 text-center">
                                     <div className="flex flex-col items-center gap-2">
-                                        <Users className="h-8 w-8 text-muted-foreground" />
+                                        <Users className="text-muted-foreground h-8 w-8" />
                                         <h3 className="font-medium">No users found</h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            No users match your current filters.
-                                        </p>
+                                        <p className="text-muted-foreground text-sm">No users match your current filters.</p>
                                         <Can permission="create users">
-                                            <Button 
-                                                onClick={() => setIsCreateModalOpen(true)}
-                                                size="sm"
-                                                className="mt-2"
-                                            >
-                                                <Plus className="h-4 w-4 mr-2" />
+                                            <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="mt-2">
+                                                <Plus className="mr-2 h-4 w-4" />
                                                 Create User
                                             </Button>
                                         </Can>
@@ -378,21 +352,20 @@ export default function UsersIndex() {
                 </ConsistentTable>
                 {/* Simple Pagination */}
                 {users.links && (
-                    <div className="bg-card border rounded-lg p-4">
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-muted-foreground">
-                                Showing {users.meta?.from || 1} to {users.meta?.to || users.data.length} of {users.meta?.total || users.data.length} users
+                    <div className="bg-card rounded-lg border p-4">
+                        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                            <div className="text-muted-foreground text-sm">
+                                Showing {users.meta?.from || 1} to {users.meta?.to || users.data.length} of {users.meta?.total || users.data.length}{' '}
+                                users
                             </div>
                             <div className="flex items-center gap-1">
                                 {users.links.map((link, index) => (
                                     <Link
                                         key={index}
                                         href={link.url || '#'}
-                                        className={`px-3 py-1 text-sm rounded ${
-                                            link.active
-                                                ? 'bg-primary text-primary-foreground'
-                                                : 'hover:bg-muted'
-                                        } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`rounded px-3 py-1 text-sm ${
+                                            link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                                        } ${!link.url ? 'cursor-not-allowed opacity-50' : ''}`}
                                         preserveState
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
@@ -404,12 +377,7 @@ export default function UsersIndex() {
             </div>
 
             {/* Create Modal */}
-            <UserFormModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                roles={roles}
-                currentUserRoles={currentUserRoles}
-            />
+            <UserFormModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} roles={roles} currentUserRoles={currentUserRoles} />
 
             {/* Edit Modal */}
             <UserFormModal
@@ -431,10 +399,7 @@ export default function UsersIndex() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => deletingUser && handleDeleteUser()}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
+                        <AlertDialogAction onClick={() => deletingUser && handleDeleteUser()} className="bg-red-600 hover:bg-red-700">
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>

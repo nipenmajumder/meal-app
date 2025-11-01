@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { DatePicker } from '@/components/ui/date-picker';
+import { useForm } from '@inertiajs/react';
 import { Loader2, Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface User {
     id: number;
@@ -28,7 +28,7 @@ interface MealFormModalProps {
 
 export default function MealFormModal({ isOpen, onClose, users, editingMeal }: MealFormModalProps) {
     const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-    
+
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         user_id: editingMeal?.user_id?.toString() || '',
         date: editingMeal?.date || new Date().toISOString().split('T')[0],
@@ -118,11 +118,7 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
                     {/* User Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="user">User *</Label>
-                        <Select 
-                            value={data.user_id} 
-                            onValueChange={(value) => setData('user_id', value)}
-                            disabled={processing}
-                        >
+                        <Select value={data.user_id} onValueChange={(value) => setData('user_id', value)} disabled={processing}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a user" />
                             </SelectTrigger>
@@ -134,9 +130,7 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.user_id && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>
-                        )}
+                        {errors.user_id && <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>}
                     </div>
 
                     {/* Date */}
@@ -149,9 +143,7 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
                             disabled={processing}
                             className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                         />
-                        {errors.date && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>
-                        )}
+                        {errors.date && <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>}
                     </div>
 
                     {/* Meal Count */}
@@ -169,31 +161,19 @@ export default function MealFormModal({ isOpen, onClose, users, editingMeal }: M
                             disabled={processing}
                             className={errors.meal_count ? 'border-red-500 focus:border-red-500' : ''}
                         />
-                        {errors.meal_count && (
-                            <p className="text-sm text-red-600 dark:text-red-400">{errors.meal_count}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                            Enter meal count (0.5 increments allowed, max 10)
-                        </p>
+                        {errors.meal_count && <p className="text-sm text-red-600 dark:text-red-400">{errors.meal_count}</p>}
+                        <p className="text-muted-foreground text-xs">Enter meal count (0.5 increments allowed, max 10)</p>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-2 pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleClose}
-                            disabled={processing}
-                        >
-                            <X className="h-4 w-4 mr-2" />
+                        <Button type="button" variant="outline" onClick={handleClose} disabled={processing}>
+                            <X className="mr-2 h-4 w-4" />
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={processing || !data.user_id || !data.date || !data.meal_count}
-                        >
-                            {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            <Plus className="h-4 w-4 mr-2" />
+                        <Button type="submit" disabled={processing || !data.user_id || !data.date || !data.meal_count}>
+                            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <Plus className="mr-2 h-4 w-4" />
                             {isEditing ? 'Update Meal' : 'Add Meal'}
                         </Button>
                     </div>

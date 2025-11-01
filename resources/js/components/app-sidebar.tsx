@@ -1,12 +1,12 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { usePermissions } from '@/hooks/usePermissions';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, TrendingUp, ShoppingCart, UtensilsCrossed, Users, Shield, UserCog, Activity } from 'lucide-react';
-import AppLogo from './app-logo';
-import { usePermissions } from '@/hooks/usePermissions';
+import { Activity, LayoutGrid, Shield, ShoppingCart, TrendingUp, UserCog, Users, UtensilsCrossed } from 'lucide-react';
 import { useMemo } from 'react';
+import AppLogo from './app-logo';
 
 // Define navigation items with their required permissions
 const navigationConfig: Array<NavItem & { permission?: string; roles?: string[] }> = [
@@ -62,31 +62,33 @@ const navigationConfig: Array<NavItem & { permission?: string; roles?: string[] 
 
 export function AppSidebar() {
     const { hasPermission, hasRole } = usePermissions();
-    
+
     // Filter navigation items based on user permissions
     const mainNavItems: NavItem[] = useMemo(() => {
-        return navigationConfig.filter(item => {
-            // If no permission is required, show the item
-            if (!item.permission && !item.roles) {
-                return true;
-            }
-            
-            // Check permission
-            if (item.permission && hasPermission(item.permission)) {
-                return true;
-            }
-            
-            // Check roles
-            if (item.roles && item.roles.some(role => hasRole(role))) {
-                return true;
-            }
-            
-            return false;
-        }).map((item) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { permission, roles, ...navItem } = item;
-            return navItem;
-        });
+        return navigationConfig
+            .filter((item) => {
+                // If no permission is required, show the item
+                if (!item.permission && !item.roles) {
+                    return true;
+                }
+
+                // Check permission
+                if (item.permission && hasPermission(item.permission)) {
+                    return true;
+                }
+
+                // Check roles
+                if (item.roles && item.roles.some((role) => hasRole(role))) {
+                    return true;
+                }
+
+                return false;
+            })
+            .map((item) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { permission, roles, ...navItem } = item;
+                return navItem;
+            });
     }, [hasPermission, hasRole]);
 
     return (

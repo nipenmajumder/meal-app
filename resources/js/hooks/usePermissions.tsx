@@ -1,6 +1,6 @@
-import React from 'react';
+import type { PageProps } from '@/types';
 import { usePage } from '@inertiajs/react';
-import type { User, PageProps } from '@/types';
+import React from 'react';
 
 /**
  * Custom hook to check user permissions
@@ -21,14 +21,14 @@ export function usePermissions() {
      * Check if user has any of the specified permissions
      */
     const canAny = (permissionList: string[]): boolean => {
-        return permissionList.some(permission => permissions.includes(permission));
+        return permissionList.some((permission) => permissions.includes(permission));
     };
 
     /**
      * Check if user has all of the specified permissions
      */
     const canAll = (permissionList: string[]): boolean => {
-        return permissionList.every(permission => permissions.includes(permission));
+        return permissionList.every((permission) => permissions.includes(permission));
     };
 
     /**
@@ -53,14 +53,12 @@ export function usePermissions() {
 export function withPermission<T extends object>(
     WrappedComponent: React.ComponentType<T>,
     requiredPermission: string | string[],
-    fallback?: React.ComponentType | null
+    fallback?: React.ComponentType | null,
 ) {
     return function PermissionWrapper(props: T) {
         const { can, canAny } = usePermissions();
-        
-        const hasPermission = Array.isArray(requiredPermission) 
-            ? canAny(requiredPermission)
-            : can(requiredPermission);
+
+        const hasPermission = Array.isArray(requiredPermission) ? canAny(requiredPermission) : can(requiredPermission);
 
         if (!hasPermission) {
             return fallback ? React.createElement(fallback) : null;
@@ -80,16 +78,11 @@ interface PermissionGateProps {
     children: React.ReactNode;
 }
 
-export function PermissionGate({ 
-    permission, 
-    mode = 'any', 
-    fallback = null, 
-    children 
-}: PermissionGateProps) {
+export function PermissionGate({ permission, mode = 'any', fallback = null, children }: PermissionGateProps) {
     const { can, canAny, canAll } = usePermissions();
-    
+
     let hasPermission = false;
-    
+
     if (Array.isArray(permission)) {
         hasPermission = mode === 'all' ? canAll(permission) : canAny(permission);
     } else {

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Loader2, Plus, X, Upload, PiggyBank, Users } from 'lucide-react';
+import { useForm } from '@inertiajs/react';
+import { Loader2, PiggyBank, Plus, Upload, Users, X } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface User {
     id: number;
@@ -27,15 +27,10 @@ interface DepositFormModalProps {
     };
 }
 
-export default function DepositFormModal({ 
-    isOpen, 
-    onClose, 
-    users, 
-    editingDeposit 
-}: DepositFormModalProps) {
+export default function DepositFormModal({ isOpen, onClose, users, editingDeposit }: DepositFormModalProps) {
     const [activeTab, setActiveTab] = useState('single');
     const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-    
+
     // Single deposit form
     const { data, setData, post, put, processing, reset, errors, clearErrors } = useForm({
         user_id: editingDeposit?.user_id?.toString() || '',
@@ -62,14 +57,14 @@ export default function DepositFormModal({
     };
 
     // Bulk deposit form
-    const { 
-        data: bulkData, 
-        setData: setBulkData, 
-        post: postBulk, 
-        processing: bulkProcessing, 
-        reset: resetBulk, 
+    const {
+        data: bulkData,
+        setData: setBulkData,
+        post: postBulk,
+        processing: bulkProcessing,
+        reset: resetBulk,
         errors: bulkErrors,
-        clearErrors: clearBulkErrors 
+        clearErrors: clearBulkErrors,
     } = useForm({
         date: new Date().toISOString().split('T')[0],
         deposits: users.reduce((acc, user) => ({ ...acc, [user.id]: '' }), {} as Record<number, string>),
@@ -121,10 +116,13 @@ export default function DepositFormModal({
         // Filter out empty deposits
         const filteredDeposits = Object.entries(bulkData.deposits)
             .filter(([_, amount]) => amount && parseFloat(amount) > 0)
-            .reduce((acc, [userId, amount]) => ({
-                ...acc,
-                [userId]: parseFloat(amount)
-            }), {});
+            .reduce(
+                (acc, [userId, amount]) => ({
+                    ...acc,
+                    [userId]: parseFloat(amount),
+                }),
+                {},
+            );
 
         const submitData = {
             date: bulkData.date,
@@ -164,7 +162,7 @@ export default function DepositFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <PiggyBank className="h-5 w-5" />
@@ -196,11 +194,7 @@ export default function DepositFormModal({
                             {/* User Selection */}
                             <div className="space-y-2">
                                 <Label htmlFor="user">User *</Label>
-                                <Select 
-                                    value={data.user_id} 
-                                    onValueChange={(value) => setData('user_id', value)}
-                                    disabled={processing}
-                                >
+                                <Select value={data.user_id} onValueChange={(value) => setData('user_id', value)} disabled={processing}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a user" />
                                     </SelectTrigger>
@@ -212,9 +206,7 @@ export default function DepositFormModal({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {errors.user_id && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>
-                                )}
+                                {errors.user_id && <p className="text-sm text-red-600 dark:text-red-400">{errors.user_id}</p>}
                             </div>
 
                             {/* Date */}
@@ -227,18 +219,14 @@ export default function DepositFormModal({
                                     disabled={processing}
                                     className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                 />
-                                {errors.date && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>
-                                )}
+                                {errors.date && <p className="text-sm text-red-600 dark:text-red-400">{errors.date}</p>}
                             </div>
 
                             {/* Amount */}
                             <div className="space-y-2">
                                 <Label htmlFor="amount">Amount (৳) *</Label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                                        ৳
-                                    </span>
+                                    <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 transform">৳</span>
                                     <Input
                                         id="amount"
                                         type="number"
@@ -251,28 +239,18 @@ export default function DepositFormModal({
                                         className={`pl-8 ${errors.amount ? 'border-red-500 focus:border-red-500' : ''}`}
                                     />
                                 </div>
-                                {errors.amount && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{errors.amount}</p>
-                                )}
+                                {errors.amount && <p className="text-sm text-red-600 dark:text-red-400">{errors.amount}</p>}
                             </div>
 
                             {/* Action Buttons */}
                             <div className="flex justify-end gap-2 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleClose}
-                                    disabled={processing}
-                                >
-                                    <X className="h-4 w-4 mr-2" />
+                                <Button type="button" variant="outline" onClick={handleClose} disabled={processing}>
+                                    <X className="mr-2 h-4 w-4" />
                                     Cancel
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={processing || !data.user_id || !data.date || !data.amount}
-                                >
-                                    {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    <Plus className="h-4 w-4 mr-2" />
+                                <Button type="submit" disabled={processing || !data.user_id || !data.date || !data.amount}>
+                                    {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    <Plus className="mr-2 h-4 w-4" />
                                     {isEditing ? 'Update Deposit' : 'Add Deposit'}
                                 </Button>
                             </div>
@@ -291,22 +269,18 @@ export default function DepositFormModal({
                                     disabled={bulkProcessing}
                                     className={bulkErrors.date ? 'border-red-500 focus:border-red-500' : ''}
                                 />
-                                {bulkErrors.date && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{bulkErrors.date}</p>
-                                )}
+                                {bulkErrors.date && <p className="text-sm text-red-600 dark:text-red-400">{bulkErrors.date}</p>}
                             </div>
 
                             {/* Bulk Deposits Grid */}
                             <div className="space-y-2">
                                 <Label>Deposit amounts for each user</Label>
-                                <div className="grid gap-3 max-h-64 overflow-y-auto border rounded-lg p-3">
+                                <div className="grid max-h-64 gap-3 overflow-y-auto rounded-lg border p-3">
                                     {users.map((user) => (
                                         <div key={user.id} className="flex items-center justify-between gap-3">
-                                            <Label className="text-sm font-medium min-w-0 flex-1">
-                                                {user.name}
-                                            </Label>
+                                            <Label className="min-w-0 flex-1 text-sm font-medium">{user.name}</Label>
                                             <div className="relative w-32">
-                                                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+                                                <span className="text-muted-foreground absolute top-1/2 left-2 -translate-y-1/2 transform text-xs">
                                                     ৳
                                                 </span>
                                                 <Input
@@ -323,28 +297,18 @@ export default function DepositFormModal({
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Leave empty for users who didn't deposit anything
-                                </p>
+                                <p className="text-muted-foreground text-xs">Leave empty for users who didn't deposit anything</p>
                             </div>
 
                             {/* Bulk Action Buttons */}
                             <div className="flex justify-end gap-2 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleClose}
-                                    disabled={bulkProcessing}
-                                >
-                                    <X className="h-4 w-4 mr-2" />
+                                <Button type="button" variant="outline" onClick={handleClose} disabled={bulkProcessing}>
+                                    <X className="mr-2 h-4 w-4" />
                                     Cancel
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={bulkProcessing || !bulkData.date}
-                                >
-                                    {bulkProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    <Upload className="h-4 w-4 mr-2" />
+                                <Button type="submit" disabled={bulkProcessing || !bulkData.date}>
+                                    {bulkProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    <Upload className="mr-2 h-4 w-4" />
                                     Add Bulk Deposits
                                 </Button>
                             </div>

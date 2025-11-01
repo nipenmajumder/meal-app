@@ -1,26 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { User, Role } from '@/types';
-import { UserPlus, Edit, Mail, Lock, Shield, Activity } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Role, User } from '@/types';
+import { useForm } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
 
 interface UserFormModalProps {
     isOpen: boolean;
@@ -52,9 +38,9 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                     password: '',
                     password_confirmation: '',
                     status: user.status,
-                    roles: user.roles?.map(role => role.name) || [],
+                    roles: user.roles?.map((role) => role.name) || [],
                 });
-                setSelectedRoles(user.roles?.map(role => role.name) || []);
+                setSelectedRoles(user.roles?.map((role) => role.name) || []);
             } else {
                 reset();
                 setSelectedRoles([]);
@@ -64,7 +50,7 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         const formData = {
             ...data,
             roles: selectedRoles,
@@ -91,16 +77,13 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
         if (checked) {
             setSelectedRoles([...selectedRoles, roleName]);
         } else {
-            setSelectedRoles(selectedRoles.filter(r => r !== roleName));
+            setSelectedRoles(selectedRoles.filter((r) => r !== roleName));
         }
-        setData('roles', checked 
-            ? [...selectedRoles, roleName]
-            : selectedRoles.filter(r => r !== roleName)
-        );
+        setData('roles', checked ? [...selectedRoles, roleName] : selectedRoles.filter((r) => r !== roleName));
     };
 
     // Admin can assign any role, others can only assign roles they have or roles below their level
-    const availableRoles = roles.filter(role => {
+    const availableRoles = roles.filter((role) => {
         if (currentUserRoles.includes('Admin')) {
             return true; // Admin can assign any role
         }
@@ -111,19 +94,12 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>
-                        {isEditing ? 'Edit User' : 'Add New User'}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {isEditing 
-                            ? 'Update user details below.' 
-                            : 'Fill in the details to create a new user.'
-                        }
-                    </DialogDescription>
+                    <DialogTitle>{isEditing ? 'Edit User' : 'Add New User'}</DialogTitle>
+                    <DialogDescription>{isEditing ? 'Update user details below.' : 'Fill in the details to create a new user.'}</DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {/* Name */}
                         <div className="space-y-2">
                             <Label htmlFor="name">Name *</Label>
@@ -136,9 +112,7 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                                 placeholder="Full name"
                                 required
                             />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name}</p>
-                            )}
+                            {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
                         </div>
 
                         {/* Email */}
@@ -153,18 +127,16 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                                 placeholder="email@example.com"
                                 required
                             />
-                            {errors.email && (
-                                <p className="text-sm text-red-600">{errors.email}</p>
-                            )}
+                            {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {/* Password */}
                         <div className="space-y-2">
                             <Label htmlFor="password">
                                 Password {!isEditing && '*'}
-                                {isEditing && <span className="text-xs text-muted-foreground">(optional)</span>}
+                                {isEditing && <span className="text-muted-foreground text-xs">(optional)</span>}
                             </Label>
                             <Input
                                 id="password"
@@ -172,12 +144,10 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                                 className={errors.password ? 'border-red-500' : ''}
-                                placeholder={isEditing ? "Leave blank to keep current" : "Password"}
+                                placeholder={isEditing ? 'Leave blank to keep current' : 'Password'}
                                 required={!isEditing}
                             />
-                            {errors.password && (
-                                <p className="text-sm text-red-600">{errors.password}</p>
-                            )}
+                            {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
                         </div>
 
                         {/* Password Confirmation */}
@@ -193,19 +163,14 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                                     placeholder="Confirm password"
                                     required={!!data.password}
                                 />
-                                {errors.password_confirmation && (
-                                    <p className="text-sm text-red-600">{errors.password_confirmation}</p>
-                                )}
+                                {errors.password_confirmation && <p className="text-sm text-red-600">{errors.password_confirmation}</p>}
                             </div>
                         )}
 
                         {/* Status */}
                         <div className="space-y-2">
                             <Label htmlFor="status">Status</Label>
-                            <Select
-                                value={data.status.toString()}
-                                onValueChange={(value) => setData('status', parseInt(value))}
-                            >
+                            <Select value={data.status.toString()} onValueChange={(value) => setData('status', parseInt(value))}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -214,9 +179,7 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                                     <SelectItem value="0">Inactive</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {errors.status && (
-                                <p className="text-sm text-red-600">{errors.status}</p>
-                            )}
+                            {errors.status && <p className="text-sm text-red-600">{errors.status}</p>}
                         </div>
                     </div>
 
@@ -224,42 +187,31 @@ export function UserFormModal({ isOpen, onClose, user, roles, currentUserRoles }
                     {availableRoles.length > 0 && (
                         <div className="space-y-2">
                             <Label>Roles</Label>
-                            <div className="grid grid-cols-2 gap-2 p-3 border rounded">
+                            <div className="grid grid-cols-2 gap-2 rounded border p-3">
                                 {availableRoles.map((role) => (
                                     <div key={role.id} className="flex items-center space-x-2">
                                         <Checkbox
                                             id={`role-${role.id}`}
                                             checked={selectedRoles.includes(role.name)}
-                                            onCheckedChange={(checked) => 
-                                                handleRoleChange(role.name, checked as boolean)
-                                            }
+                                            onCheckedChange={(checked) => handleRoleChange(role.name, checked as boolean)}
                                         />
-                                        <Label 
-                                            htmlFor={`role-${role.id}`}
-                                            className="text-sm font-normal"
-                                        >
+                                        <Label htmlFor={`role-${role.id}`} className="text-sm font-normal">
                                             {role.name}
                                         </Label>
                                     </div>
                                 ))}
                             </div>
-                            {errors.roles && (
-                                <p className="text-sm text-red-600">{errors.roles}</p>
-                            )}
+                            {errors.roles && <p className="text-sm text-red-600">{errors.roles}</p>}
                         </div>
                     )}
 
                     {/* Form Actions */}
                     <div className="flex justify-end gap-2 pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onClose}
-                        >
+                        <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+                            {processing ? 'Saving...' : isEditing ? 'Update' : 'Create'}
                         </Button>
                     </div>
                 </form>

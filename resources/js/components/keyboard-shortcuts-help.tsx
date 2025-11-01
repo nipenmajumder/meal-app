@@ -1,12 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Keyboard } from 'lucide-react';
 
 interface Shortcut {
@@ -29,18 +22,16 @@ export function KeyboardShortcutsHelp({ shortcuts }: KeyboardShortcutsHelpProps)
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>Keyboard Shortcuts</DialogTitle>
-                    <DialogDescription>
-                        Use these shortcuts to navigate and perform actions quickly
-                    </DialogDescription>
+                    <DialogDescription>Use these shortcuts to navigate and perform actions quickly</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3">
                     {shortcuts.map((shortcut, index) => (
                         <div
                             key={index}
-                            className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                            className="bg-muted/50 hover:bg-muted flex items-center justify-between rounded-lg px-3 py-2 transition-colors"
                         >
-                            <span className="text-sm text-foreground">{shortcut.description}</span>
-                            <kbd className="pointer-events-none inline-flex h-7 select-none items-center gap-1 rounded border bg-background px-2 font-mono text-xs font-medium text-muted-foreground">
+                            <span className="text-foreground text-sm">{shortcut.description}</span>
+                            <kbd className="bg-background text-muted-foreground pointer-events-none inline-flex h-7 items-center gap-1 rounded border px-2 font-mono text-xs font-medium select-none">
                                 {shortcut.keys}
                             </kbd>
                         </div>

@@ -3,10 +3,7 @@ import { useMemo } from 'react';
 /**
  * Hook to optimize table calculations with memoization
  */
-export function useOptimizedTableCalculations<T extends Record<string, unknown>>(
-    data: T[],
-    userNames: string[],
-) {
+export function useOptimizedTableCalculations<T extends Record<string, unknown>>(data: T[], userNames: string[]) {
     const calculateRowTotal = useMemo(
         () => (row: T) => {
             return userNames.reduce((sum, name) => {

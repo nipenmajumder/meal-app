@@ -1,6 +1,6 @@
-import React from 'react';
-import { usePage } from '@inertiajs/react';
 import { Auth } from '@/types';
+import { usePage } from '@inertiajs/react';
+import React from 'react';
 
 interface CanProps {
     permission?: string;
@@ -11,7 +11,7 @@ interface CanProps {
 
 export function Can({ permission, role, children, fallback = null }: CanProps) {
     const { auth } = usePage<{ auth: Auth }>().props;
-    
+
     if (!auth.user) {
         return <>{fallback}</>;
     }

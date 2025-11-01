@@ -1,48 +1,28 @@
+import { Can } from '@/components/Can';
 import {
-    Table,
-    TableHead,
-    TableHeader,
-    TableRow,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
-import {
-    ConsistentTable,
-    ConsistentTableHeader,
-    ConsistentTableRow,
     ConsistentTableCell,
     ConsistentTableHead,
+    ConsistentTableHeader,
+    ConsistentTableRow,
     ScrollableTableContainer,
 } from '@/components/consistent-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Can } from '@/components/Can';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
-import { Head, useForm, router } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
-import { PlusCircle, ChevronLeft, ChevronRight, Calculator, Download, UtensilsCrossed, Users } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TableBody } from '@/components/ui/table';
+import { useToast } from '@/components/ui/use-toast';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useOptimizedTableCalculations } from '@/hooks/use-optimized-table';
-import { useToast } from '@/components/ui/use-toast';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight, Download, PlusCircle, Users, UtensilsCrossed } from 'lucide-react';
+import { useState } from 'react';
 
 type Meals = {
     date: string;
@@ -80,17 +60,31 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
     const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
     const { toast } = useToast();
 
-    const { data: formData, setData, post, processing, reset, errors } = useForm({
+    const {
+        data: formData,
+        setData,
+        post,
+        processing,
+        reset,
+        errors,
+    } = useForm({
         user_id: '',
         date: new Date().toISOString().split('T')[0],
         meal_count: '',
     });
 
-    const { data: bulkFormData, setData: setBulkData, post: postBulk, processing: bulkProcessing, reset: resetBulk, errors: bulkErrors } = useForm({
+    const {
+        data: bulkFormData,
+        setData: setBulkData,
+        post: postBulk,
+        processing: bulkProcessing,
+        reset: resetBulk,
+        errors: bulkErrors,
+    } = useForm({
         date: new Date().toISOString().split('T')[0],
         meals: {} as Record<string, string>,
     });
-    
+
     // Use optimized calculations
     const { calculateRowTotal, calculateColumnTotal, calculateGrandTotal } = useOptimizedTableCalculations(data, userNames);
 
@@ -132,8 +126,6 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         }
     };
 
-
-
     const getCellClassName = (value: string | number | undefined): string => {
         if (!value || value === 0) return 'text-gray-400';
         const num = Number(value);
@@ -143,7 +135,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         return 'text-gray-500 font-medium bg-gray-50';
     };
 
-    const getAmountBadgeVariant = (value: string | number | undefined): "default" | "secondary" | "destructive" | "outline" => {
+    const getAmountBadgeVariant = (value: string | number | undefined): 'default' | 'secondary' | 'destructive' | 'outline' => {
         if (!value || value === 0) return 'outline';
         const num = Number(value);
         if (num >= 2) return 'default';
@@ -206,26 +198,27 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
 
     const navigateMonth = (direction: 'prev' | 'next') => {
         const current = new Date(currentMonth + '-01');
-        const newMonth = direction === 'prev' 
-            ? new Date(current.getFullYear(), current.getMonth() - 1, 1)
-            : new Date(current.getFullYear(), current.getMonth() + 1, 1);
-        
+        const newMonth =
+            direction === 'prev'
+                ? new Date(current.getFullYear(), current.getMonth() - 1, 1)
+                : new Date(current.getFullYear(), current.getMonth() + 1, 1);
+
         const monthParam = newMonth.toISOString().slice(0, 7);
         router.get(`/meals?month=${monthParam}`);
     };
 
     const formatMonthDisplay = (monthStr: string) => {
         const date = new Date(monthStr + '-01');
-        return date.toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric',
         });
     };
 
     const getCurrentMonth = () => {
         return formatMonthDisplay(currentMonth);
     };
-    
+
     // Keyboard shortcuts
     useKeyboardShortcuts([
         {
@@ -252,26 +245,26 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Meal Tracking" />
 
-            <div className="p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in slide-in-from-bottom-4 p-4 duration-500">
                 {/* Month Navigation and Stats */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center space-x-4">
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => navigateMonth('prev')}
                             title="Previous Month (Alt + ←)"
-                            className="hover:scale-105 transition-transform"
+                            className="transition-transform hover:scale-105"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <h1 className="text-xl sm:text-2xl font-bold">Meals - {getCurrentMonth()}</h1>
-                        <Button 
-                            variant="outline" 
+                        <h1 className="text-xl font-bold sm:text-2xl">Meals - {getCurrentMonth()}</h1>
+                        <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => navigateMonth('next')}
                             title="Next Month (Alt + →)"
-                            className="hover:scale-105 transition-transform"
+                            className="transition-transform hover:scale-105"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -279,12 +272,12 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
 
                     <div className="flex flex-wrap items-center gap-2">
                         <Can permission="export meals">
-                            <Button variant="outline" onClick={handleExport} className="hover:scale-105 transition-transform">
+                            <Button variant="outline" onClick={handleExport} className="transition-transform hover:scale-105">
                                 <Download className="mr-2 h-4 w-4" />
                                 Export
                             </Button>
                         </Can>
-                        
+
                         <Can permission="bulk import meals">
                             <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
                                 <DialogTrigger asChild>
@@ -307,16 +300,14 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                                 disabled={bulkProcessing}
                                                 className={bulkErrors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
-                                            {bulkErrors.date && (
-                                                <p className="text-red-500 text-sm mt-1">{bulkErrors.date}</p>
-                                            )}
+                                            {bulkErrors.date && <p className="mt-1 text-sm text-red-500">{bulkErrors.date}</p>}
                                         </div>
 
                                         <div className="max-h-96 overflow-y-auto">
                                             <Label className="text-base font-semibold">Meal Counts for Each User</Label>
-                                            <div className="grid gap-3 mt-2">
+                                            <div className="mt-2 grid gap-3">
                                                 {users.map((user) => (
-                                                    <div key={user.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                                                    <div key={user.id} className="flex items-center space-x-3 rounded-lg border p-3">
                                                         <div className="flex-1">
                                                             <Label className="font-medium">{user.name}</Label>
                                                         </div>
@@ -335,17 +326,13 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                                     </div>
                                                 ))}
                                             </div>
-                                            <p className="text-sm text-muted-foreground mt-2">
+                                            <p className="text-muted-foreground mt-2 text-sm">
                                                 Leave empty or enter 0 for users who didn't have meals
                                             </p>
                                         </div>
 
-                                        <div className="flex justify-end space-x-2 pt-4 border-t">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => setIsBulkDialogOpen(false)}
-                                            >
+                                        <div className="flex justify-end space-x-2 border-t pt-4">
+                                            <Button type="button" variant="outline" onClick={() => setIsBulkDialogOpen(false)}>
                                                 Cancel
                                             </Button>
                                             <Button type="submit" disabled={bulkProcessing}>
@@ -356,11 +343,11 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                 </DialogContent>
                             </Dialog>
                         </Can>
-                        
+
                         <Can permission="create meals">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="hover:scale-105 transition-transform" title="Add New Meal (Ctrl + N)">
+                                    <Button className="transition-transform hover:scale-105" title="Add New Meal (Ctrl + N)">
                                         <PlusCircle className="mr-2 h-4 w-4" />
                                         Add Meal
                                     </Button>
@@ -372,10 +359,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
                                             <Label htmlFor="user_id">User</Label>
-                                            <Select
-                                                value={formData.user_id}
-                                                onValueChange={(value) => setData('user_id', value)}
-                                            >
+                                            <Select value={formData.user_id} onValueChange={(value) => setData('user_id', value)}>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select a user" />
                                                 </SelectTrigger>
@@ -387,9 +371,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {errors.user_id && (
-                                                <p className="text-red-500 text-sm mt-1">{errors.user_id}</p>
-                                            )}
+                                            {errors.user_id && <p className="mt-1 text-sm text-red-500">{errors.user_id}</p>}
                                         </div>
 
                                         <div>
@@ -401,9 +383,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                                 disabled={processing}
                                                 className={errors.date ? 'border-red-500 focus:border-red-500' : ''}
                                             />
-                                            {errors.date && (
-                                                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
-                                            )}
+                                            {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
                                         </div>
 
                                         <div>
@@ -418,20 +398,12 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                                                 onChange={(e) => setData('meal_count', e.target.value)}
                                                 placeholder="0"
                                             />
-                                            <p className="text-sm text-muted-foreground mt-1">
-                                                Enter the number of meals (e.g., 1, 1.5, 2)
-                                            </p>
-                                            {errors.meal_count && (
-                                                <p className="text-red-500 text-sm mt-1">{errors.meal_count}</p>
-                                            )}
+                                            <p className="text-muted-foreground mt-1 text-sm">Enter the number of meals (e.g., 1, 1.5, 2)</p>
+                                            {errors.meal_count && <p className="mt-1 text-sm text-red-500">{errors.meal_count}</p>}
                                         </div>
 
                                         <div className="flex justify-end space-x-2">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => setIsAddDialogOpen(false)}
-                                            >
+                                            <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                                                 Cancel
                                             </Button>
                                             <Button type="submit" disabled={processing}>
@@ -457,91 +429,77 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                         }}
                     />
                 ) : (
-                <ScrollableTableContainer>
-                    <ConsistentTableHeader>
-                        <ConsistentTableRow>
-                            <ConsistentTableHead isSticky>
-                                Date
-                            </ConsistentTableHead>
-                            {userNames.map((name) => (
-                                <ConsistentTableHead key={name}>
-                                    <div className="flex items-center justify-center gap-1">
-                                     {name}
-                                    </div>
-                                </ConsistentTableHead>
-                            ))}
-                        </ConsistentTableRow>
-                    </ConsistentTableHeader>
-                    <TableBody>
-                        {data.map((row, idx) => {
-                            const rowTotal = calculateRowTotal(row);
-                            const isEvenRow = idx % 2 === 0;
-                            
-                            // Format date as "1-July-Monday"
-                            const dateObj = new Date(row.date.split('-').reverse().join('-'));
-                            const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
-                            
-                            return (
-                                <ConsistentTableRow key={idx} isEvenRow={isEvenRow}>
-                                    <ConsistentTableCell isSticky>
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold text-center text-sm">
-                                                {formattedDate}
-                                            </span>
-                                        </div>
-                                    </ConsistentTableCell>
-                                    {userNames.map((name) => {
-                                        const value = row[name];
-                                        
-                                        return (
-                                            <ConsistentTableCell key={name} className={getCellClassName(value)}>
-                                                <div>
-                                                    {value && Number(value) !== 0 ? (
-                                                        <Badge 
-                                                            variant={getAmountBadgeVariant(value)}
-                                                            className="text-sm font-medium px-3 py-1"
-                                                        >
-                                                            {formatMealCount(value)}
-                                                        </Badge>
-                                                    ) : (
-                                                        <span className="text-muted-foreground text-lg">—</span>
-                                                    )}
-                                                </div>
-                                            </ConsistentTableCell>
-                                        );
-                                    })}
-                                </ConsistentTableRow>
-                            );
-                        })}
-                        
-                        {/* Summation Row */}
-                        <ConsistentTableRow isSummaryRow>
-                            <ConsistentTableCell isSticky>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-center text-sm">
-                                        TOTAL
-                                    </span>
-                                </div>
-                            </ConsistentTableCell>
-                            {userNames.map((name) => {
-                                const columnTotal = calculateColumnTotal(name);
-                                
+                    <ScrollableTableContainer>
+                        <ConsistentTableHeader>
+                            <ConsistentTableRow>
+                                <ConsistentTableHead isSticky>Date</ConsistentTableHead>
+                                {userNames.map((name) => (
+                                    <ConsistentTableHead key={name}>
+                                        <div className="flex items-center justify-center gap-1">{name}</div>
+                                    </ConsistentTableHead>
+                                ))}
+                            </ConsistentTableRow>
+                        </ConsistentTableHeader>
+                        <TableBody>
+                            {data.map((row, idx) => {
+                                const rowTotal = calculateRowTotal(row);
+                                const isEvenRow = idx % 2 === 0;
+
+                                // Format date as "1-July-Monday"
+                                const dateObj = new Date(row.date.split('-').reverse().join('-'));
+                                const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
+
                                 return (
-                                    <ConsistentTableCell key={name}>
-                                        <div>
-                                            <Badge 
-                                                variant="default"
-                                                className="text-sm font-bold px-3 py-1 bg-primary hover:bg-primary/90"
-                                            >
-                                                {formatMealCount(columnTotal)}
-                                            </Badge>
-                                        </div>
-                                    </ConsistentTableCell>
+                                    <ConsistentTableRow key={idx} isEvenRow={isEvenRow}>
+                                        <ConsistentTableCell isSticky>
+                                            <div className="flex flex-col">
+                                                <span className="text-center text-sm font-semibold">{formattedDate}</span>
+                                            </div>
+                                        </ConsistentTableCell>
+                                        {userNames.map((name) => {
+                                            const value = row[name];
+
+                                            return (
+                                                <ConsistentTableCell key={name} className={getCellClassName(value)}>
+                                                    <div>
+                                                        {value && Number(value) !== 0 ? (
+                                                            <Badge variant={getAmountBadgeVariant(value)} className="px-3 py-1 text-sm font-medium">
+                                                                {formatMealCount(value)}
+                                                            </Badge>
+                                                        ) : (
+                                                            <span className="text-muted-foreground text-lg">—</span>
+                                                        )}
+                                                    </div>
+                                                </ConsistentTableCell>
+                                            );
+                                        })}
+                                    </ConsistentTableRow>
                                 );
                             })}
-                        </ConsistentTableRow>
-                    </TableBody>
-                </ScrollableTableContainer>
+
+                            {/* Summation Row */}
+                            <ConsistentTableRow isSummaryRow>
+                                <ConsistentTableCell isSticky>
+                                    <div className="flex flex-col">
+                                        <span className="text-center text-sm font-bold">TOTAL</span>
+                                    </div>
+                                </ConsistentTableCell>
+                                {userNames.map((name) => {
+                                    const columnTotal = calculateColumnTotal(name);
+
+                                    return (
+                                        <ConsistentTableCell key={name}>
+                                            <div>
+                                                <Badge variant="default" className="bg-primary hover:bg-primary/90 px-3 py-1 text-sm font-bold">
+                                                    {formatMealCount(columnTotal)}
+                                                </Badge>
+                                            </div>
+                                        </ConsistentTableCell>
+                                    );
+                                })}
+                            </ConsistentTableRow>
+                        </TableBody>
+                    </ScrollableTableContainer>
                 )}
             </div>
         </AppLayout>

@@ -22,12 +22,7 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[], enabled = tr
                 const shiftMatch = shortcut.shiftKey ? event.shiftKey : !event.shiftKey;
                 const altMatch = shortcut.altKey ? event.altKey : !event.altKey;
 
-                if (
-                    event.key.toLowerCase() === shortcut.key.toLowerCase() &&
-                    ctrlMatch &&
-                    shiftMatch &&
-                    altMatch
-                ) {
+                if (event.key.toLowerCase() === shortcut.key.toLowerCase() && ctrlMatch && shiftMatch && altMatch) {
                     event.preventDefault();
                     shortcut.callback();
                 }

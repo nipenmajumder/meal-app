@@ -1,28 +1,27 @@
+import { Can } from '@/components/Can';
+import {
+    ConsistentTableCell,
+    ConsistentTableHead,
+    ConsistentTableHeader,
+    ConsistentTableRow,
+    ScrollableTableContainer,
+} from '@/components/consistent-table';
+import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DatePicker } from '@/components/ui/date-picker';
-import {
-    ConsistentTable,
-    ConsistentTableHeader,
-    ConsistentTableRow,
-    ConsistentTableCell,
-    ConsistentTableHead,
-    ScrollableTableContainer,
-} from '@/components/consistent-table';
-import { Can } from '@/components/Can';
+import { useToast } from '@/components/ui/use-toast';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useOptimizedTableCalculations } from '@/hooks/use-optimized-table';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Download, FileText, PlusCircle, Upload, Wallet } from 'lucide-react';
 import React, { useState } from 'react';
-import { EmptyState } from '@/components/empty-state';
-import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
-import { useOptimizedTableCalculations } from '@/hooks/use-optimized-table';
-import { useToast } from '@/components/ui/use-toast';
 
 type Deposits = {
     date: string;
@@ -73,7 +72,7 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         date: new Date().toISOString().split('T')[0],
         amount: '',
     });
-    
+
     // Use optimized calculations
     const { calculateColumnTotal } = useOptimizedTableCalculations(data, userNames);
 
@@ -94,7 +93,6 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         return `${year}-${month}-${day}`;
     };
 
-
     // Helper functions
     const formatCurrency = (value: string | number | undefined): string => {
         if (!value || value === 0) return '—';
@@ -105,9 +103,6 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
             minimumFractionDigits: 2,
         }).format(num);
     };
-
-
-
 
     const getCellClassName = (value: string | number | undefined): string => {
         if (!value || value === 0) return 'text-gray-400';
@@ -192,7 +187,7 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
     const getCurrentMonth = () => {
         return formatMonthDisplay(currentMonth);
     };
-    
+
     // Keyboard shortcuts
     useKeyboardShortcuts([
         {
@@ -219,15 +214,27 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daily Contributions" />
 
-            <div className="p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in slide-in-from-bottom-4 p-4 duration-500">
                 {/* Month Navigation and Stats */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center space-x-4">
-                        <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')} title="Previous Month (Alt + ←)" className="hover:scale-105 transition-transform">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigateMonth('prev')}
+                            title="Previous Month (Alt + ←)"
+                            className="transition-transform hover:scale-105"
+                        >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <h1 className="text-xl sm:text-2xl font-bold">Deposits - {getCurrentMonth()}</h1>
-                        <Button variant="outline" size="sm" onClick={() => navigateMonth('next')} title="Next Month (Alt + →)" className="hover:scale-105 transition-transform">
+                        <h1 className="text-xl font-bold sm:text-2xl">Deposits - {getCurrentMonth()}</h1>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigateMonth('next')}
+                            title="Next Month (Alt + →)"
+                            className="transition-transform hover:scale-105"
+                        >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -259,7 +266,9 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
                                                 accept=".csv,.txt"
                                                 onChange={(e) => setImportFile(e.target.files?.[0] || null)}
                                             />
-                                            <p className="text-muted-foreground mt-1 text-sm">Upload a CSV file with columns: user_id, date, amount</p>
+                                            <p className="text-muted-foreground mt-1 text-sm">
+                                                Upload a CSV file with columns: user_id, date, amount
+                                            </p>
                                         </div>
 
                                         <div className="flex justify-end space-x-2">
@@ -366,88 +375,74 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
                         }}
                     />
                 ) : (
-                <ScrollableTableContainer>
-                    <ConsistentTableHeader>
-                        <ConsistentTableRow>
-                            <ConsistentTableHead isSticky>
-                                Date
-                            </ConsistentTableHead>
-                            {userNames.map((name) => (
-                                <ConsistentTableHead key={name}>
-                                    <div className="flex items-center justify-center gap-1">
-                                     {name}
-                                    </div>
-                                </ConsistentTableHead>
-                            ))}
-                        </ConsistentTableRow>
-                    </ConsistentTableHeader>
-                    <tbody>
-                        {data.map((row, idx) => {
-                            const isEvenRow = idx % 2 === 0;
-                            const dateObj = new Date(row.date.split('-').reverse().join('-'));
-                            const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
-
-                            return (
-                                <ConsistentTableRow key={idx} isEvenRow={isEvenRow}>
-                                    <ConsistentTableCell isSticky>
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold text-center text-sm">
-                                                {formattedDate}
-                                            </span>
-                                        </div>
-                                    </ConsistentTableCell>
-                                    {userNames.map((name) => {
-                                        const value = row[name];
-
-                                        return (
-                                            <ConsistentTableCell key={name} className={getCellClassName(value)}>
-                                                <div className="flex justify-center">
-                                                    {value && Number(value) !== 0 ? (
-                                                        <Badge
-                                                            variant={getAmountBadgeVariant(value)}
-                                                            className="text-sm font-medium px-3 py-1"
-                                                        >
-                                                            {formatCurrency(value)}
-                                                        </Badge>
-                                                    ) : (
-                                                        <span className="text-muted-foreground text-lg">—</span>
-                                                    )}
-                                                </div>
-                                            </ConsistentTableCell>
-                                        );
-                                    })}
-                                </ConsistentTableRow>
-                            );
-                        })}
-
-                        {/* Summation Row */}
-                        <ConsistentTableRow isSummaryRow>
-                            <ConsistentTableCell isSticky>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-center text-sm">
-                                        TOTAL
-                                    </span>
-                                </div>
-                            </ConsistentTableCell>
-                            {userNames.map((name) => {
-                                const columnTotal = calculateColumnTotal(name);
+                    <ScrollableTableContainer>
+                        <ConsistentTableHeader>
+                            <ConsistentTableRow>
+                                <ConsistentTableHead isSticky>Date</ConsistentTableHead>
+                                {userNames.map((name) => (
+                                    <ConsistentTableHead key={name}>
+                                        <div className="flex items-center justify-center gap-1">{name}</div>
+                                    </ConsistentTableHead>
+                                ))}
+                            </ConsistentTableRow>
+                        </ConsistentTableHeader>
+                        <tbody>
+                            {data.map((row, idx) => {
+                                const isEvenRow = idx % 2 === 0;
+                                const dateObj = new Date(row.date.split('-').reverse().join('-'));
+                                const formattedDate = `${dateObj.getDate()}-${dateObj.toLocaleString('en-US', { month: 'long' })}-${dateObj.toLocaleString('en-US', { weekday: 'long' })}`;
 
                                 return (
-                                    <ConsistentTableCell key={name}>
-                                        <div className="flex justify-center">
-                                            <Badge 
-                                                variant="default"
-                                                className="text-sm font-bold px-3 py-1 bg-primary hover:bg-primary/90"
-                                            >
-                                                {formatCurrency(columnTotal)}
-                                            </Badge>
-                                        </div>
-                                    </ConsistentTableCell>
+                                    <ConsistentTableRow key={idx} isEvenRow={isEvenRow}>
+                                        <ConsistentTableCell isSticky>
+                                            <div className="flex flex-col">
+                                                <span className="text-center text-sm font-semibold">{formattedDate}</span>
+                                            </div>
+                                        </ConsistentTableCell>
+                                        {userNames.map((name) => {
+                                            const value = row[name];
+
+                                            return (
+                                                <ConsistentTableCell key={name} className={getCellClassName(value)}>
+                                                    <div className="flex justify-center">
+                                                        {value && Number(value) !== 0 ? (
+                                                            <Badge variant={getAmountBadgeVariant(value)} className="px-3 py-1 text-sm font-medium">
+                                                                {formatCurrency(value)}
+                                                            </Badge>
+                                                        ) : (
+                                                            <span className="text-muted-foreground text-lg">—</span>
+                                                        )}
+                                                    </div>
+                                                </ConsistentTableCell>
+                                            );
+                                        })}
+                                    </ConsistentTableRow>
                                 );
                             })}
-                        </ConsistentTableRow>
-                    </tbody>
-                </ScrollableTableContainer>
+
+                            {/* Summation Row */}
+                            <ConsistentTableRow isSummaryRow>
+                                <ConsistentTableCell isSticky>
+                                    <div className="flex flex-col">
+                                        <span className="text-center text-sm font-bold">TOTAL</span>
+                                    </div>
+                                </ConsistentTableCell>
+                                {userNames.map((name) => {
+                                    const columnTotal = calculateColumnTotal(name);
+
+                                    return (
+                                        <ConsistentTableCell key={name}>
+                                            <div className="flex justify-center">
+                                                <Badge variant="default" className="bg-primary hover:bg-primary/90 px-3 py-1 text-sm font-bold">
+                                                    {formatCurrency(columnTotal)}
+                                                </Badge>
+                                            </div>
+                                        </ConsistentTableCell>
+                                    );
+                                })}
+                            </ConsistentTableRow>
+                        </tbody>
+                    </ScrollableTableContainer>
                 )}
             </div>
         </AppLayout>
