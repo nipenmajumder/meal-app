@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, UtensilsCrossed, Wallet, ShoppingBag, TrendingUp, Users as UsersIcon } from 'lucide-react';
 import { 
     ConsistentTable, 
     ConsistentTableHeader, 
@@ -11,6 +11,8 @@ import {
     ConsistentTableCell, 
     ConsistentTableHead 
 } from '@/components/consistent-table';
+import { EmptyState } from '@/components/empty-state';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 
 interface User {
     id: number;
@@ -50,6 +52,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
     };
     
     const usersList = users || [];
+    
     const handleMonthChange = (direction: 'prev' | 'next') => {
         const currentDate = new Date(currentMonth + '-01');
         const newDate = new Date(currentDate);
@@ -71,6 +74,28 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
         if (numBalance < 0) return 'destructive';
         return 'secondary';
     };
+    
+    // Keyboard shortcuts
+    useKeyboardShortcuts([
+        {
+            key: 'ArrowLeft',
+            altKey: true,
+            callback: () => handleMonthChange('prev'),
+            description: 'Go to previous month',
+        },
+        {
+            key: 'ArrowRight',
+            altKey: true,
+            callback: () => handleMonthChange('next'),
+            description: 'Go to next month',
+        },
+        {
+            key: 'e',
+            ctrlKey: true,
+            callback: handleExport,
+            description: 'Export report',
+        },
+    ]);
 
     return (
         <AppLayout>
@@ -96,6 +121,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                             size="sm"
                             onClick={() => handleMonthChange('prev')}
                             className="w-full sm:w-auto px-4 sm:px-6 py-2"
+                            title="Previous Month (Alt + ←)"
                         >
                             <ChevronLeft className="h-4 w-4 mr-2" />
                             Previous Month
@@ -105,6 +131,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                             size="sm"
                             onClick={() => handleMonthChange('next')}
                             className="w-full sm:w-auto px-4 sm:px-6 py-2"
+                            title="Next Month (Alt + →)"
                         >
                             Next Month
                             <ChevronRight className="h-4 w-4 ml-2" />
@@ -114,6 +141,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                             size="sm"
                             onClick={handleExport}
                             className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2"
+                            title="Export Report (Ctrl + E)"
                         >
                             <Download className="h-4 w-4 mr-2" />
                             Export Report
@@ -122,10 +150,11 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                    <Card className="hover:shadow-md transition-shadow">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Meals</CardTitle>
+                            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
                             <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{stats.totalMeals}</div>
@@ -135,9 +164,10 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Meal Rate</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
                             <div className="text-xl sm:text-2xl lg:text-3xl font-bold">
@@ -149,9 +179,10 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Cost</CardTitle>
+                            <Wallet className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
                             <div className="text-xl sm:text-2xl lg:text-3xl font-bold">৳{stats.mealCost.toFixed(2)}</div>
@@ -161,9 +192,10 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Deposits</CardTitle>
+                            <Download className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
                             <div className="text-xl sm:text-2xl lg:text-3xl font-bold">৳{stats.totalDeposits.toFixed(2)}</div>
@@ -173,9 +205,10 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Shopping</CardTitle>
+                            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
                             <div className="text-xl sm:text-2xl lg:text-3xl font-bold">৳{stats.shoppingCost.toFixed(2)}</div>
@@ -185,12 +218,13 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </CardContent>
                     </Card>
                     
-                    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-green-500">
+                    <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200 border-l-4 border-l-green-500 dark:border-l-green-400">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Current Balance</CardTitle>
+                            <Wallet className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="pt-0">
-                            <div className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
+                            <div className={`text-xl sm:text-2xl lg:text-3xl font-bold transition-colors ${
                                 stats.totalBalance >= 0 
                                     ? 'text-green-600 dark:text-green-400' 
                                     : 'text-red-600 dark:text-red-400'
@@ -204,17 +238,29 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                     </Card>
                 </div>
                 {/* User Balances Table */}
+                {usersList.length === 0 ? (
+                    <EmptyState
+                        icon={UsersIcon}
+                        title="No Users Found"
+                        description="There are no users registered for this month. Add users to start tracking meals and expenses."
+                    />
+                ) : (
+                    <>
                 {/* Mobile Card View */}
                 <div className="block sm:hidden">
-                    <div className="space-y-4 p-4">
-                        {usersList.map((user) => {
+                    <div className="space-y-4 p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {usersList.map((user, index) => {
                             const balance = Number(user.balance || 0);
                             const totalMeal = Number(user.total_meal || 0);
                             const totalCost = Number(user.total_cost || 0);
                             const totalDeposit = Number(user.total_deposit || 0);
                             
                             return (
-                                <div key={user.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2">
+                                <div 
+                                    key={user.id} 
+                                    className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2 hover:shadow-md transition-all duration-200"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
                                     <div className="font-medium text-base">{user.name}</div>
                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                         <div>
@@ -282,7 +328,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                 </div>
 
                 {/* Desktop Table View */}
-                <div className="hidden sm:block">
+                <div className="hidden sm:block animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <ConsistentTable>
                         <ConsistentTableHeader>
                             <ConsistentTableRow className="bg-gray-50 dark:bg-gray-800">
@@ -301,7 +347,7 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                                 const totalDeposit = Number(user.total_deposit || 0);
                                 
                                 return (
-                                    <ConsistentTableRow key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <ConsistentTableRow key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
                                         <ConsistentTableCell className="font-medium py-4 px-6 text-base">
                                             {user.name}
                                         </ConsistentTableCell>
@@ -358,6 +404,8 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                         </tbody>
                     </ConsistentTable>
                 </div>
+                    </>
+                )}
             </div>
         </AppLayout>
     );
