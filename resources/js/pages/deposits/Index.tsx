@@ -17,8 +17,12 @@ import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Download, FileText, PlusCircle, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileText, PlusCircle, Upload, Wallet } from 'lucide-react';
 import React, { useState } from 'react';
+import { EmptyState } from '@/components/empty-state';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useOptimizedTableCalculations } from '@/hooks/use-optimized-table';
+import { useToast } from '@/components/ui/use-toast';
 
 type Deposits = {
     date: string;
@@ -55,6 +59,7 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
+    const { toast } = useToast();
 
     const {
         data: formData,
@@ -68,6 +73,9 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         date: new Date().toISOString().split('T')[0],
         amount: '',
     });
+    
+    // Use optimized calculations
+    const { calculateColumnTotal } = useOptimizedTableCalculations(data, userNames);
 
     // Helper functions for date handling
     const getDateFromString = (dateString: string): Date | undefined => {
@@ -98,12 +106,6 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
         }).format(num);
     };
 
-    const calculateColumnTotal = (userName: string): number => {
-        return data.reduce((sum, row) => {
-            const value = Number(row[userName]) || 0;
-            return sum + value;
-        }, 0);
-    };
 
 
 
@@ -130,6 +132,17 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
             onSuccess: () => {
                 reset();
                 setIsAddDialogOpen(false);
+                toast({
+                    title: 'Success',
+                    description: 'Deposit added successfully',
+                });
+            },
+            onError: () => {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to add deposit',
+                    variant: 'destructive',
+                });
             },
         });
     };
@@ -179,20 +192,42 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
     const getCurrentMonth = () => {
         return formatMonthDisplay(currentMonth);
     };
+    
+    // Keyboard shortcuts
+    useKeyboardShortcuts([
+        {
+            key: 'ArrowLeft',
+            altKey: true,
+            callback: () => navigateMonth('prev'),
+            description: 'Go to previous month',
+        },
+        {
+            key: 'ArrowRight',
+            altKey: true,
+            callback: () => navigateMonth('next'),
+            description: 'Go to next month',
+        },
+        {
+            key: 'n',
+            ctrlKey: true,
+            callback: () => setIsAddDialogOpen(true),
+            description: 'Add new deposit',
+        },
+    ]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daily Contributions" />
 
-            <div className="p-4">
+            <div className="p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Month Navigation and Stats */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div className="flex items-center space-x-4">
-                        <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
+                        <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')} title="Previous Month (Alt + ←)" className="hover:scale-105 transition-transform">
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <h1 className="text-2xl font-bold">Deposits - {getCurrentMonth()}</h1>
-                        <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
+                        <h1 className="text-xl sm:text-2xl font-bold">Deposits - {getCurrentMonth()}</h1>
+                        <Button variant="outline" size="sm" onClick={() => navigateMonth('next')} title="Next Month (Alt + →)" className="hover:scale-105 transition-transform">
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
@@ -320,6 +355,17 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
                 </div>
 
                 {/* Enhanced User-Friendly Table */}
+                {data.length === 0 ? (
+                    <EmptyState
+                        icon={Wallet}
+                        title="No Deposits Recorded"
+                        description="Start tracking deposits by adding deposit records for users."
+                        action={{
+                            label: 'Add First Deposit',
+                            onClick: () => setIsAddDialogOpen(true),
+                        }}
+                    />
+                ) : (
                 <ScrollableTableContainer>
                     <ConsistentTableHeader>
                         <ConsistentTableRow>
@@ -402,6 +448,7 @@ export default function Deposits({ userNames, data, users, currentMonth }: Props
                         </ConsistentTableRow>
                     </tbody>
                 </ScrollableTableContainer>
+                )}
             </div>
         </AppLayout>
     );

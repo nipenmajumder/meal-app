@@ -37,8 +37,12 @@ import { Can } from '@/components/Can';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PlusCircle, ChevronLeft, ChevronRight, Calculator, Download, UtensilsCrossed, Users } from 'lucide-react';
+import { EmptyState } from '@/components/empty-state';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useOptimizedTableCalculations } from '@/hooks/use-optimized-table';
+import { useToast } from '@/components/ui/use-toast';
 
 type Meals = {
     date: string;
@@ -74,6 +78,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Meals({ userNames, data, users, currentMonth, monthlyStats }: Props) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+    const { toast } = useToast();
 
     const { data: formData, setData, post, processing, reset, errors } = useForm({
         user_id: '',
@@ -85,6 +90,9 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         date: new Date().toISOString().split('T')[0],
         meals: {} as Record<string, string>,
     });
+    
+    // Use optimized calculations
+    const { calculateRowTotal, calculateColumnTotal, calculateGrandTotal } = useOptimizedTableCalculations(data, userNames);
 
     // Helper functions
     const formatMealCount = (value: string | number | undefined): string => {
@@ -124,25 +132,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
         }
     };
 
-    const calculateRowTotal = (row: Meals): number => {
-        return userNames.reduce((sum, name) => {
-            const value = Number(row[name]) || 0;
-            return sum + value;
-        }, 0);
-    };
 
-    const calculateColumnTotal = (userName: string): number => {
-        return data.reduce((sum, row) => {
-            const value = Number(row[userName]) || 0;
-            return sum + value;
-        }, 0);
-    };
-
-    const calculateGrandTotal = (): number => {
-        return data.reduce((sum, row) => {
-            return sum + calculateRowTotal(row);
-        }, 0);
-    };
 
     const getCellClassName = (value: string | number | undefined): string => {
         if (!value || value === 0) return 'text-gray-400';
@@ -167,6 +157,17 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
             onSuccess: () => {
                 reset();
                 setIsAddDialogOpen(false);
+                toast({
+                    title: 'Success',
+                    description: 'Meal record added successfully',
+                });
+            },
+            onError: () => {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to add meal record',
+                    variant: 'destructive',
+                });
             },
         });
     };
@@ -177,6 +178,17 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
             onSuccess: () => {
                 resetBulk();
                 setIsBulkDialogOpen(false);
+                toast({
+                    title: 'Success',
+                    description: 'Bulk meals added successfully',
+                });
+            },
+            onError: () => {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to add bulk meals',
+                    variant: 'destructive',
+                });
             },
         });
     };
@@ -213,35 +225,61 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
     const getCurrentMonth = () => {
         return formatMonthDisplay(currentMonth);
     };
+    
+    // Keyboard shortcuts
+    useKeyboardShortcuts([
+        {
+            key: 'ArrowLeft',
+            altKey: true,
+            callback: () => navigateMonth('prev'),
+            description: 'Go to previous month',
+        },
+        {
+            key: 'ArrowRight',
+            altKey: true,
+            callback: () => navigateMonth('next'),
+            description: 'Go to next month',
+        },
+        {
+            key: 'n',
+            ctrlKey: true,
+            callback: () => setIsAddDialogOpen(true),
+            description: 'Add new meal',
+        },
+    ]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Meal Tracking" />
 
-            <div className="p-4">
+            <div className="p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Month Navigation and Stats */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div className="flex items-center space-x-4">
                         <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => navigateMonth('prev')}
+                            title="Previous Month (Alt + ←)"
+                            className="hover:scale-105 transition-transform"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
-                        <h1 className="text-2xl font-bold">Meals - {getCurrentMonth()}</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold">Meals - {getCurrentMonth()}</h1>
                         <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => navigateMonth('next')}
+                            title="Next Month (Alt + →)"
+                            className="hover:scale-105 transition-transform"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Can permission="export meals">
-                            <Button variant="outline" onClick={handleExport}>
+                            <Button variant="outline" onClick={handleExport} className="hover:scale-105 transition-transform">
                                 <Download className="mr-2 h-4 w-4" />
                                 Export
                             </Button>
@@ -322,7 +360,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                         <Can permission="create meals">
                             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button>
+                                    <Button className="hover:scale-105 transition-transform" title="Add New Meal (Ctrl + N)">
                                         <PlusCircle className="mr-2 h-4 w-4" />
                                         Add Meal
                                     </Button>
@@ -408,6 +446,17 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                 </div>
 
                 {/* Enhanced Meal Tracking Table */}
+                {data.length === 0 ? (
+                    <EmptyState
+                        icon={UtensilsCrossed}
+                        title="No Meals Recorded"
+                        description="Start tracking meals by adding meal records for users."
+                        action={{
+                            label: 'Add First Meal',
+                            onClick: () => setIsAddDialogOpen(true),
+                        }}
+                    />
+                ) : (
                 <ScrollableTableContainer>
                     <ConsistentTableHeader>
                         <ConsistentTableRow>
@@ -493,6 +542,7 @@ export default function Meals({ userNames, data, users, currentMonth, monthlySta
                         </ConsistentTableRow>
                     </TableBody>
                 </ScrollableTableContainer>
+                )}
             </div>
         </AppLayout>
     );
