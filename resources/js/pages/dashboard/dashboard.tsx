@@ -150,14 +150,14 @@ export default function Dashboard({ statistics, users, currentMonth, formattedMo
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 animate-in fade-in slide-in-from-bottom-4 duration-500" role="region" aria-label="Monthly Statistics">
                     <Card className="hover:shadow-lg hover:scale-105 transition-all duration-200">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Meals</CardTitle>
-                            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
+                            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                         </CardHeader>
                         <CardContent className="pt-0">
-                            <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{stats.totalMeals}</div>
+                            <div className="text-xl sm:text-2xl lg:text-3xl font-bold" aria-label={`Total meals: ${stats.totalMeals}`}>{stats.totalMeals}</div>
                             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                 Meals consumed
                             </p>
